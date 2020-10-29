@@ -37,7 +37,7 @@ class peon:
         return back
 
 
-class bord:
+class board:
     def __init__(self, call: list):
         if call is None:
             call = [peon('g', i) for i in range(4)]
@@ -45,18 +45,11 @@ class bord:
             call.extend([peon('b', i + 5) for i in range(4)])
         self.val = call
 
-    def expose_bord(bord):
-        return [p.id for p in bord]
-
-    def move(self, p, kind):
-    global bord
-    place = bord.index(p)
-    bord[place + distance(kind) * p.dir] = p
-    bord[place] = peon(' ', 4)
-    return bord)
+    def expose(self):
+        return [p.id for p in self.val]
 
 
-def list_moves(bord: bord):
+def list_moves(bord: board):
     movi = []
     for p in bord:
         if p.is_step():
@@ -75,17 +68,22 @@ def distance(kind):
         raise ValueError
 
 
-def move(
+def move(bord, p, kind):
+    place = bord.index(p)
+    bord[place + distance(kind) * p.dir] = p
+    bord[place] = peon(' ', 4)
+    return bord
 
 
 def Game():
+    bord = board()
     cond = True
-    print(expose_bord(bord))
+    print(bord.expose)
     while cond:
         try:
             movi = list_moves()
             ch = choice(movi)
-            move(ch[0], ch[1])
+            bord = move(ch[0], ch[1])
         except IndexError:
             cond = False
         print(expose_bord(bord))
