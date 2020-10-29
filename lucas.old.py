@@ -46,13 +46,6 @@ bord.extend([peon('b', i + 5) for i in range(4)])
 def expose_bord(bord):
     return [p.id for p in bord]
 
-def move(p, kind):
-    global bord
-    place = bord.index(p)
-    bord[place + distance(kind) * p.dir] = p
-    bord[place] = peon(' ', 4)
-    return bord)
-
 
 def list_moves():
     movi = []
@@ -73,10 +66,15 @@ def distance(kind):
         raise ValueError
 
 
-def move(
+def move(p, kind):
+    global bord
+    place = bord.index(p)
+    bord[place + distance(kind) * p.dir] = p
+    bord[place] = peon(' ', 4)
+    return bord
 
 
-def Game():
+def game():
     cond = True
     print(expose_bord(bord))
     while cond:
@@ -88,8 +86,7 @@ def Game():
             cond = False
         print(expose_bord(bord))
 
-
-Game()
+game()
 
 """
 print(expose_bord(bord))
