@@ -17,7 +17,8 @@ class peon:
     # minor hack: giving the empty peon non-zero direction, since there's only one of it
     # means we won't need to make special case for it and it won't find another empty peon it that direction.
 
-    def is_step(self):
+    def is_step(self, bord):
+        bord = bord.val
         place = bord.index(self)
         try:
             pl = place + self.dir  # a place one step to the left or to the right
@@ -26,7 +27,8 @@ class peon:
         back = bord[pl].color is ' '
         return back
 
-    def is_jump(self):
+    def is_jump(self, bord):
+        bord = bord.val
         place = bord.index(self)
         try:
             pl1 = place + self.dir
@@ -38,7 +40,7 @@ class peon:
 
 
 class board:
-    def __init__(self, call: list):
+    def __init__(self, call=None):
         if call is None:
             call = [peon('g', i) for i in range(4)]
             call.append(peon(' ', 4))
@@ -51,10 +53,10 @@ class board:
 
 def list_moves(bord: board):
     movi = []
-    for p in bord:
-        if p.is_step():
+    for p in bord.val:
+        if p.is_step(bord):
             movi.append((p, 'step'))
-        if p.is_jump():
+        if p.is_jump(bord):
             movi.append((p, 'jump'))
     return movi
 
@@ -69,24 +71,25 @@ def distance(kind):
 
 
 def move(bord, p, kind):
+    bord = bord.val
     place = bord.index(p)
     bord[place + distance(kind) * p.dir] = p
     bord[place] = peon(' ', 4)
-    return bord
+    return board(bord)
 
 
 def Game():
     bord = board()
     cond = True
-    print(bord.expose)
+    print(bord.expose())
     while cond:
         try:
-            movi = list_moves()
+            movi = list_moves(bord)
             ch = choice(movi)
-            bord = move(ch[0], ch[1])
+            bord = move(bord, ch[0], ch[1])
         except IndexError:
             cond = False
-        print(expose_bord(bord))
+        print(bord.expose())
 
 
 Game()
