@@ -9,6 +9,7 @@ class peon:
         self.dir = self.dir()
 
     def dir(self):
+        """returns direction as positive or negative unit (int)"""
         if self.color in {'g', ' '}:
             return 1
         elif self.color is 'b':
@@ -18,6 +19,7 @@ class peon:
     # means we won't need to make special case for it and it won't find another empty peon it that direction.
 
     def is_step(self, bord):
+        """returns boolean value of is it possible for the peon to move one space"""
         bord = bord.val
         place = bord.index(self)
         try:
@@ -28,6 +30,7 @@ class peon:
         return back
 
     def is_jump(self, bord):
+        """returns boolean value of is it possible for the peon jump over one opposite peon"""
         bord = bord.val
         place = bord.index(self)
         try:
@@ -48,10 +51,12 @@ class board:
         self.val = call
 
     def expose(self):
+        """returns human readable list of unique peons"""
         return [p.id for p in self.val]
 
 
 def list_moves(bord: board):
+    """returns list of possible moves. each move formated as a pair of a peon object and a string for kind of move"""
     movi = []
     for p in bord.val:
         if p.is_step(bord):
@@ -62,6 +67,7 @@ def list_moves(bord: board):
 
 
 def distance(kind):
+    """returns int value for each kind of move"""
     if kind is 'jump':
         return 2
     elif kind is 'step':
@@ -71,6 +77,7 @@ def distance(kind):
 
 
 def move(bord, p, kind):
+    """returns a new board object for the state after the move is taken"""
     bord = bord.val
     place = bord.index(p)
     bord[place + distance(kind) * p.dir] = p
