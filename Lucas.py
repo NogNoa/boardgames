@@ -15,8 +15,15 @@ class peon:
         elif self.color is 'b':
             return -1
 
-    # minor hack: giving the blank peon non-zero direction, since there's only one of it
-    # means we won't need to make special case for it and it won't find another empty peon it that direction.
+    # minor hack: giving the blank peon non-zero direction. since there's only one blank peon
+    # we won't need to make special case for it and it won't find another blank peon it that direction.
+
+    def place(self, bord):
+        """retruns the the index (int) of the peon on the bord from grey side to black side
+        bord is assumed to be either board object or a list (it's self.val)"""
+        if type(bord) is board:
+            bord = bord.val
+        return bord.index(self)
 
     def is_step(self, bord):
         """returns boolean value of is it possible for the peon to move one space"""
@@ -54,6 +61,17 @@ class board:
         """returns human readable list of unique peons"""
         return [p.id for p in self.val]
 
+    def score(self):
+        back = 0
+        for p in self.val:
+            point = p.place(self)
+            if p.color == 'b':
+                point = len(self.val) - point - 1
+            elif p.color == ' ':
+                point = 0
+            back += point
+        return back
+
 
 def list_moves(bord: board):
     """returns list of possible moves. each move formated as a pair of a peon object and a string for kind of move"""
@@ -82,7 +100,7 @@ def distance(kind):
 
 
 def move(bord, p, kind):
-    """returns a new board object for the state after the move is taken"""
+    """returns a new board object repesenting the state after the move is taken"""
     bord = bord.val
     place = bord.index(p)
     bord[place + distance(kind) * p.dir] = p
@@ -102,6 +120,7 @@ def Game():
         except IndexError:
             cond = False
         print(bord.expose())
+        print(bord.score())
 
 
 def random_move(movi):
