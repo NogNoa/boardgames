@@ -15,7 +15,7 @@ class peon:
         elif self.color is 'b':
             return -1
 
-    # minor hack: giving the empty peon non-zero direction, since there's only one of it
+    # minor hack: giving the blank peon non-zero direction, since there's only one of it
     # means we won't need to make special case for it and it won't find another empty peon it that direction.
 
     def is_step(self, bord):
@@ -59,11 +59,16 @@ def list_moves(bord: board):
     """returns list of possible moves. each move formated as a pair of a peon object and a string for kind of move"""
     movi = []
     for p in bord.val:
+        if p.color == ' ':
+            continue
         if p.is_step(bord):
             movi.append((p, 'step'))
         if p.is_jump(bord):
             movi.append((p, 'jump'))
     return movi
+
+# skipping blank peon move listing fixes IndexError in this function in the endgame.
+# it might make prior blank direction hack unnecesary.
 
 
 def distance(kind):
@@ -90,13 +95,17 @@ def Game():
     cond = True
     print(bord.expose())
     while cond:
+        movi = list_moves(bord)
         try:
-            movi = list_moves(bord)
-            ch = choice(movi)
+            ch = random_move(movi)
             bord = move(bord, ch[0], ch[1])
         except IndexError:
             cond = False
         print(bord.expose())
+
+
+def random_move(movi):
+    return choice(movi)
 
 
 Game()
