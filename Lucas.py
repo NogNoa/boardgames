@@ -126,6 +126,15 @@ def Game():
 def random_move(movi):
     return choice(movi)
 
+def move_score(movi,bord):
+    back = []
+    for move in movi:
+        consequnce = move(bord, move[0], move[1])
+        score = consequnce.score()
+        move = tuple(list(move).append(score))
+        back.append(move)
+    return back
+
 
 Game()
 
