@@ -12,7 +12,7 @@ class peon:
         """returns direction as positive or negative unit (int)"""
         if self.color in {'g', ' '}:
             return 1
-        elif self.color is 'b':
+        elif self.color == 'b':
             return -1
 
     # minor hack: giving the blank peon non-zero direction. since there's only one blank peon
@@ -33,7 +33,7 @@ class peon:
             pl = place + self.dir  # a place one step to the left or to the right
         except IndexError:
             return False
-        back = bord[pl].color is ' '
+        back = bord[pl].color == ' '
         return back
 
     def is_jump(self, bord):
@@ -45,7 +45,7 @@ class peon:
             pl2 = pl1 + self.dir
         except IndexError:
             return False
-        back = bord[pl1].dir is -self.dir and bord[pl2].color is ' '
+        back = bord[pl1].dir == -self.dir and bord[pl2].color == ' '
         return back
 
 
@@ -80,20 +80,31 @@ def list_moves(bord: board):
         if p.color == ' ':
             continue
         if p.is_step(bord):
-            movi.append((p, 'step'))
+            movi.append([p, 'step'])
         if p.is_jump(bord):
-            movi.append((p, 'jump'))
+            movi.append([p, 'jump'])
+    movi = movi_score(movi, bord)
     return movi
 
 # skipping blank peon move listing fixes IndexError in this function in the endgame.
 # it might make prior blank direction hack unnecesary.
 
 
+def movi_score(movi, bord):
+    back = []
+    for mv in movi:
+        consequnce = move(bord, mv[0], mv[1])
+        score = consequnce.score()
+        mv = (mv[0], mv[1], score)
+        back.append(mv)
+    return back
+
+
 def distance(kind):
     """returns int value for each kind of move"""
-    if kind is 'jump':
+    if kind == 'jump':
         return 2
-    elif kind is 'step':
+    elif kind == 'step':
         return 1
     else:
         raise ValueError
@@ -115,7 +126,7 @@ def Game():
     while cond:
         movi = list_moves(bord)
         try:
-            ch = random_move(movi)
+            ch = single_max_choice(movi)
             bord = move(bord, ch[0], ch[1])
         except IndexError:
             cond = False
@@ -123,17 +134,17 @@ def Game():
         print(bord.score())
 
 
-def random_move(movi):
+def random_choice(movi):
     return choice(movi)
 
-def move_score(movi,bord):
-    back = []
-    for move in movi:
-        consequnce = move(bord, move[0], move[1])
-        score = consequnce.score()
-        move = tuple(list(move).append(score))
-        back.append(move)
+
+def single_max_choice(movi):
+    scori = [move[2] for move in movi]
+    best = max(scori)
+    back = movi[scori.index(best)]
     return back
+
+
 
 
 Game()
