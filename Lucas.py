@@ -1,4 +1,5 @@
 from random import choice
+from copy import deepcopy
 
 
 class peon:
@@ -74,7 +75,9 @@ class board:
 
 
 def list_moves(bord: board):
-    """returns list of possible moves. each move formated as a pair of a peon object and a string for kind of move"""
+    """returns list of possible moves. each move formated as
+    a pair of a peon object, a string for kind of move,
+    and an int for the score of the move"""
     movi = []
     for p in bord.val:
         if p.color == ' ':
@@ -91,6 +94,7 @@ def list_moves(bord: board):
 
 
 def movi_score(movi, bord):
+    """take a list of moves without a score and adds a score"""
     back = []
     for mv in movi:
         consequnce = move(bord, mv[0], mv[1])
@@ -112,7 +116,8 @@ def distance(kind):
 
 def move(bord, p, kind):
     """returns a new board object repesenting the state after the move is taken"""
-    bord = bord.val
+    # deepcopy is used to let us to look ahead at future boards without changing the current one
+    bord = deepcopy(bord.val)
     place = bord.index(p)
     bord[place + distance(kind) * p.dir] = p
     bord[place] = peon(' ', 4)
