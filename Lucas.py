@@ -131,7 +131,7 @@ def Game():
     while cond:
         movi = list_moves(bord)
         try:
-            ch = single_max_choice(movi)
+            ch = random_choice(movi)
             bord = move(bord, ch[0], ch[1])
         except IndexError:
             cond = False
