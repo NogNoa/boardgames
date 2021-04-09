@@ -2,7 +2,7 @@ from random import choice
 from copy import deepcopy
 
 
-class peon:
+class Peon:
     def __init__(self, color, ordinal):
         self.color = color
         self.ordinal = ordinal
@@ -22,9 +22,9 @@ class peon:
     def place(self, bord):
         """retruns the the index (int) of the peon on the bord from grey side to black side
         bord is assumed to be either board object or a list (it's self.val)"""
-        if type(bord) is board:
+        if type(bord) is Board:
             bord = bord.val
-        return bord.index(self)
+        return bord.val.index(self)
 
     def is_step(self, bord):
         """returns boolean value of is it possible for the peon to move one space"""
@@ -50,12 +50,12 @@ class peon:
         return back
 
 
-class board:
+class Board:
     def __init__(self, call=None):
         if call is None:
-            call = [peon('g', i) for i in range(4)]
-            call.append(peon(' ', 4))
-            call.extend([peon('b', i + 5) for i in range(4)])
+            call = [Peon('g', i) for i in range(4)]
+            call.append(Peon(' ', 4))
+            call.extend([Peon('b', i + 5) for i in range(4)])
         self.val = call
 
     def expose(self):
@@ -74,7 +74,7 @@ class board:
         return back
 
 
-def list_moves(bord: board):
+def list_moves(bord: Board):
     """returns list of possible moves. each move formated as
     a pair of a peon object, a string for kind of move,
     and an int for the score of the move"""
@@ -89,8 +89,9 @@ def list_moves(bord: board):
     movi = movi_score(movi, bord)
     return movi
 
+
 # skipping blank peon move listing fixes IndexError in this function in the endgame.
-# it might make prior blank direction hack unnecesary.
+# it might make prior blank direction hack unnecessary.
 
 
 def movi_score(movi, bord):
@@ -120,12 +121,12 @@ def move(bord, p, kind):
     bord = deepcopy(bord.val)
     place = bord.index(p)
     bord[place + distance(kind) * p.dir] = p
-    bord[place] = peon(' ', 4)
-    return board(bord)
+    bord[place] = Peon(' ', 4)
+    return Board(bord)
 
 
-def Game():
-    bord = board()
+def game():
+    bord = Board()
     cond = True
     print(bord.expose())
     while cond:
@@ -144,15 +145,13 @@ def random_choice(movi):
 
 
 def single_max_choice(movi):
-    scori = [move[2] for move in movi]
+    scori = [mov[2] for mov in movi]
     best = max(scori)
     back = movi[scori.index(best)]
     return back
 
 
-
-
-Game()
+game()
 
 """
 print(expose_bord(bord))
