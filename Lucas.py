@@ -2,12 +2,13 @@ from random import choice
 from copy import deepcopy
 
 
-class peon:
-    def __init__(self, color, ordinal):
+class Peon:
+    def __init__(self, bord, color, ordinal):
         self.color = color
         self.ordinal = ordinal
         self.id = color + str(ordinal)
         self.dir = self.dir()
+        self.bord = bord
 
     def dir(self):
         """returns direction as positive or negative unit (int)"""
@@ -19,44 +20,21 @@ class peon:
     # minor hack: giving the blank peon non-zero direction. since there's only one blank peon
     # we won't need to make special case for it and it won't find another blank peon it that direction.
 
-    def place(self, bord):
-        """retruns the the index (int) of the peon on the bord from grey side to black side
-        bord is assumed to be either board object or a list (it's self.val)"""
-        if type(bord) is board:
-            bord = bord.val
-        return bord.index(self)
-
-    def is_step(self, bord):
-        """returns boolean value of is it possible for the peon to move one space"""
-        bord = bord.val
-        place = bord.index(self)
-        try:
-            pl = place + self.dir  # a place one step to the left or to the right
-        except IndexError:
-            return False
-        back = bord[pl].color == ' '
-        return back
-
-    def is_jump(self, bord):
-        """returns boolean value of is it possible for the peon jump over one opposite peon"""
-        bord = bord.val
-        place = bord.index(self)
-        try:
-            pl1 = place + self.dir
-            pl2 = pl1 + self.dir
-        except IndexError:
-            return False
-        back = bord[pl1].dir == -self.dir and bord[pl2].color == ' '
-        return back
+    def place(self):
+        """retruns the the index (int) of the peon on the bord from grey side to black side"""
+        return self.bord.place(self)
 
 
-class board:
+class Board:
     def __init__(self, call=None):
         if call is None:
-            call = [peon('g', i) for i in range(4)]
-            call.append(peon(' ', 4))
-            call.extend([peon('b', i + 5) for i in range(4)])
+            call = [Peon(self, 'g', i) for i in range(4)]
+            call.append(Peon(self, ' ', 4))
+            call.extend([Peon(self, 'b', i + 5) for i in range(4)])
         self.val = call
+
+    def place(self, p: Peon):
+        return self.val.index(p)
 
     def expose(self):
         """returns human readable list of unique peons"""
@@ -65,7 +43,7 @@ class board:
     def score(self):
         back = 0
         for p in self.val:
-            point = p.place(self)
+            point = self.place(p)
             if p.color == 'b':
                 point = len(self.val) - point - 1
             elif p.color == ' ':
@@ -73,8 +51,24 @@ class board:
             back += point
         return back
 
+    def is_step(self, p: Peon):
+        try:
+            pl = self.place(p) + p.dir  # a place one step to the left or to the right
+        except IndexError:
+            return False
+        return self.val[pl].color == ' '
 
-def list_moves(bord: board):
+    def is_jump(self, p: Peon):
+        pl0 = self.place(p)
+        try:
+            pl1 = pl0 + p.dir
+            pl2 = pl1 + p.dir
+        except IndexError:
+            return False
+        back = self.val[pl1].dir == p.dir and self.val[pl2].color == ' '
+
+
+def list_moves(bord: Board):
     """returns list of possible moves. each move formated as
     a pair of a peon object, a string for kind of move,
     and an int for the score of the move"""
@@ -89,8 +83,9 @@ def list_moves(bord: board):
     movi = movi_score(movi, bord)
     return movi
 
+
 # skipping blank peon move listing fixes IndexError in this function in the endgame.
-# it might make prior blank direction hack unnecesary.
+# it might make prior blank direction hack unnecessary.
 
 
 def movi_score(movi, bord):
@@ -120,12 +115,12 @@ def move(bord, p, kind):
     bord = deepcopy(bord.val)
     place = bord.index(p)
     bord[place + distance(kind) * p.dir] = p
-    bord[place] = peon(' ', 4)
-    return board(bord)
+    bord[place] = Peon(' ', 4)
+    return Board(bord)
 
 
-def Game():
-    bord = board()
+def game():
+    bord = Board()
     cond = True
     print(bord.expose())
     while cond:
@@ -150,9 +145,7 @@ def single_max_choice(movi):
     return back
 
 
-
-
-Game()
+game()
 
 """
 print(expose_bord(bord))
