@@ -139,7 +139,7 @@ def random_choice(movi):
 
 
 def single_max_choice(movi):
-    scori = [move[2] for move in movi]
+    scori = [mov[2] for mov in movi]
     best = max(scori)
     back = movi[scori.index(best)]
     return back
