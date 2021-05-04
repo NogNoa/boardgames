@@ -53,8 +53,8 @@ class Board:
 
     def is_step(self, p: Peon):
         """returns boolean value of is it possible for a peon to move one space"""
+        pl = self.place(p) + p.dir  # a place one step to the left or to the right
         try:
-            pl = self.place(p) + p.dir  # a place one step to the left or to the right
             back = self.val[pl].color == ' '
         except IndexError:
             return False
@@ -62,8 +62,8 @@ class Board:
 
     def is_jump(self, p: Peon):
         """returns boolean value of is it possible for the peon jump over one peon"""
+        pl = self.place(p) + p.dir * 2
         try:
-            pl = self.place(p) + p.dir * 2
             back = self.val[pl].color == ' '
         except IndexError:
             return False
@@ -78,9 +78,9 @@ def list_moves(bord: Board):
     for p in bord.val:
         if p.color == ' ':
             continue
-        if p.is_step(bord):
+        if bord.is_step(p):
             movi.append([p, 'step'])
-        if p.is_jump(bord):
+        if bord.is_jump(p):
             movi.append([p, 'jump'])
     movi = movi_score(movi, bord)
     return movi
@@ -117,7 +117,7 @@ def move(bord, p, kind):
     bord = deepcopy(bord.val)
     place = bord.index(p)
     bord[place + distance(kind) * p.dir] = p
-    bord[place] = Peon(' ', 4)
+    bord[place] = Peon(bord, ' ', 4)
     return Board(bord)
 
 
@@ -154,3 +154,6 @@ print(expose_bord(bord))
 joe = [i.is_step() for i in bord]
 print(joe)
 """
+# TODO: probably shouldn't create a new board in each move().
+#  Or else, let it identify same peon on different future boards.
+#  That's what the id is supposedly for.
