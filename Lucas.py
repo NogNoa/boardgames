@@ -52,20 +52,22 @@ class Board:
         return back
 
     def is_step(self, p: Peon):
+        """returns boolean value of is it possible for a peon to move one space"""
         try:
             pl = self.place(p) + p.dir  # a place one step to the left or to the right
+            back = self.val[pl].color == ' '
         except IndexError:
             return False
-        return self.val[pl].color == ' '
+        return back
 
     def is_jump(self, p: Peon):
-        pl0 = self.place(p)
+        """returns boolean value of is it possible for the peon jump over one peon"""
         try:
-            pl1 = pl0 + p.dir
-            pl2 = pl1 + p.dir
+            pl = self.place(p) + p.dir * 2
+            back = self.val[pl].color == ' '
         except IndexError:
             return False
-        back = self.val[pl1].dir == p.dir and self.val[pl2].color == ' '
+        return back
 
 
 def list_moves(bord: Board):
