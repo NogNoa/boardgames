@@ -10,6 +10,12 @@ class Peon:
         self.dir = self.dir()
         self.bord = bord
 
+    def __str__(self):
+        return self.id
+
+    """def __repr__(self):
+        return self.id"""
+
     def dir(self):
         """returns direction as positive or negative unit (int)"""
         if self.color in {'g', ' '}:
@@ -21,19 +27,23 @@ class Peon:
     # we won't need to make special case for it and it won't find another blank peon it that direction.
 
     def place(self):
-        """retruns the the index (int) of the peon on the bord from grey side to black side"""
         return self.bord.place(self)
 
 
 class Board:
-    def __init__(self, call=None):
+    def __init__(self, call=None, emp=None):
         if call is None:
             call = [Peon(self, 'g', i) for i in range(4)]
-            call.append(Peon(self, ' ', 4))
+            self.emp = (Peon(self, ' ', 4))
+            call.append(self.emp)
             call.extend([Peon(self, 'b', i + 5) for i in range(4)])
+        else:
+            self.emp = emp
+            #  if you provide call you HAVE to provide emp! I couldn't be asked to search it for you.
         self.val = call
 
     def place(self, p: Peon):
+        """retruns the the index (int) of a peon on the bord from grey side to black side"""
         return self.val.index(p)
 
     def expose(self):
@@ -61,7 +71,7 @@ class Board:
         return back
 
     def is_jump(self, p: Peon):
-        """returns boolean value of is it possible for the peon jump over one peon"""
+        """returns boolean value of is it possible for a peon jump over one peon"""
         pl = self.place(p) + p.dir * 2
         try:
             back = self.val[pl].color == ' '
@@ -114,11 +124,11 @@ def distance(kind):
 def move(bord, p, kind):
     """returns a new board object repesenting the state after the move is taken"""
     # deepcopy is used to let us to look ahead at future boards without changing the current one
-    bord = deepcopy(bord.val)
-    place = bord.index(p)
-    bord[place + distance(kind) * p.dir] = p
-    bord[place] = Peon(bord, ' ', 4)
-    return Board(bord)
+    n_bord = deepcopy(bord.val)
+    place = n_bord.index(p)
+    n_bord[place + distance(kind) * p.dir] = p
+    n_bord[place] = bord.emp
+    return Board(n_bord, bord.emp)
 
 
 def game():
@@ -157,3 +167,4 @@ print(joe)
 # TODO: probably shouldn't create a new board in each move().
 #  Or else, let it identify same peon on different future boards.
 #  That's what the id is supposedly for.
+#  something is wonky in the hierarchy
