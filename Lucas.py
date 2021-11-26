@@ -3,18 +3,21 @@ from copy import deepcopy
 
 
 class Peon:
-    def __init__(self, bord, color, ordinal):
+    def __init__(self, color, ordinal):
         self.color = color
         self.ordinal = ordinal
         self.id = color + str(ordinal)
         self.dir = self.dir()
+        self.bord = None
+
+    def set_bord(self, bord):
         self.bord = bord
 
     def __str__(self):
         return self.id
 
-    """def __repr__(self):
-        return self.id"""
+    def __repr__(self):
+        return self.id
 
     def dir(self):
         """returns direction as positive or negative unit (int)"""
@@ -22,33 +25,48 @@ class Peon:
             return 1
         elif self.color == 'b':
             return -1
+        else:
+            return None
 
     # minor hack: giving the blank peon non-zero direction. since there's only one blank peon
-    # we won't need to make special case for it and it won't find another blank peon it that direction.
+    # we won't need to make special case for it and it won't find another blank peon in that direction.
 
     def place(self):
         return self.bord.place(self)
 
+    def step_dest(self):
+        return self.bord.step_dest(self)
+
+    def jump_dest(self):
+        return self.bord.jump_dest(self)
+
+    def is_step(self) -> bool:
+        """returns boolean value of is it possible for a peon to move one space"""
+        step_dest = self.step_dest()
+        return step_dest is not None and step_dest.color == ' '
+
+    def is_jump(self) -> bool:
+        """returns boolean value of is it possible for a peon jump over one peon"""
+        jump_dest = self.jump_dest()
+        return jump_dest is not None and jump_dest.color == ' '
+
 
 class Board:
-    def __init__(self, call=None, emp=None):
-        if call is None:
-            call = [Peon(self, 'g', i) for i in range(4)]
-            self.emp = (Peon(self, ' ', 4))
-            call.append(self.emp)
-            call.extend([Peon(self, 'b', i + 5) for i in range(4)])
-        else:
-            self.emp = emp
-            #  if you provide call you HAVE to provide emp! I couldn't be asked to search it for you.
-        self.val = call
+    def __init__(self, order: list, emp):
+        self.val = self.order = order
+        self.emp = emp
+
+    def peons_asosiate(self):
+        for p in self.order:
+            p.set_bord(self)
+
+    def __str__(self):
+        """returns human readable list of unique peons"""
+        return str(self.val)
 
     def place(self, p: Peon):
         """retruns the the index (int) of a peon on the bord from grey side to black side"""
         return self.val.index(p)
-
-    def expose(self):
-        """returns human readable list of unique peons"""
-        return [p.id for p in self.val]
 
     def score(self):
         back = 0
@@ -61,23 +79,17 @@ class Board:
             back += point
         return back
 
-    def is_step(self, p: Peon):
-        """returns boolean value of is it possible for a peon to move one space"""
-        pl = self.place(p) + p.dir  # a place one step to the left or to the right
+    def step_dest(self, p: Peon):
         try:
-            back = self.val[pl].color == ' '
+            return self.order[self.place(p) + p.dir]  # a place one step to the left or to the right
         except IndexError:
-            return False
-        return back
+            return None
 
-    def is_jump(self, p: Peon):
-        """returns boolean value of is it possible for a peon jump over one peon"""
-        pl = self.place(p) + p.dir * 2
+    def jump_dest(self, p: Peon):
         try:
-            back = self.val[pl].color == ' '
+            return self.order[self.place(p) + p.dir * 2]  # a place two steps to the left or to the right
         except IndexError:
-            return False
-        return back
+            return None
 
 
 def list_moves(bord: Board):
@@ -88,9 +100,9 @@ def list_moves(bord: Board):
     for p in bord.val:
         if p.color == ' ':
             continue
-        if bord.is_step(p):
+        if p.is_step():
             movi.append([p, 'step'])
-        if bord.is_jump(p):
+        if p.is_jump():
             movi.append([p, 'jump'])
     movi = movi_score(movi, bord)
     return movi
@@ -132,17 +144,22 @@ def move(bord, p, kind):
 
 
 def game():
-    bord = Board()
-    cond = True
-    print(bord.expose())
-    while cond:
+    openning = [Peon('g', i) for i in range(4)]
+    emp = (Peon(' ', 4))
+    openning.append(emp)
+    openning.extend([Peon('b', i + 5) for i in range(4)])
+    bord = Board(openning, emp)
+    bord.peons_asosiate()
+    print(bord)
+    cont = True
+    while cont:
         movi = list_moves(bord)
         try:
             ch = random_choice(movi)
             bord = move(bord, ch[0], ch[1])
         except IndexError:
-            cond = False
-        print(bord.expose())
+            cont = False
+        print(bord)
         print(bord.score())
 
 
@@ -157,7 +174,8 @@ def single_max_choice(movi):
     return back
 
 
-game()
+if __name__ == "__main__":
+    game()
 
 """
 print(expose_bord(bord))
@@ -168,3 +186,8 @@ print(joe)
 #  Or else, let it identify same peon on different future boards.
 #  That's what the id is supposedly for.
 #  something is wonky in the hierarchy
+#  try opposite direction, get rid of Board object and make program more functional, with a list instead of Board.
+#  and control decentralised in the hands of each Peon.
+#  -
+#  clear separation of work. Board is just a phone book to find other Peons,
+#  the game function call the peons to actually make the moves, and update Board.
