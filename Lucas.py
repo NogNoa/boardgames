@@ -21,11 +21,10 @@ class Peon:
 
     def dir(self):
         """returns direction as positive or negative unit (int)"""
-        if self.color in {'g', ' '}:
-            return 1
-        elif self.color == 'b':
-            return -1
-        else:
+        dirdic = {'g': 1, ' ': 1, 'b': -1}
+        try:
+            return dirdic[self.color]
+        except KeyError:
             return None
 
     # minor hack: giving the blank peon non-zero direction. since there's only one blank peon
@@ -101,9 +100,9 @@ def list_moves(bord: Board):
         if p.color == ' ':
             continue
         if p.is_step():
-            movi.append([p, 'step'])
+            movi.append({'peon': p, 'kind': 'step'})
         if p.is_jump():
-            movi.append([p, 'jump'])
+            movi.append({'peon': p, 'kind': 'jump'})
     movi = movi_score(movi, bord)
     return movi
 
@@ -116,7 +115,7 @@ def movi_score(movi, bord):
     """take a list of moves without a score and adds a score"""
     back = []
     for mv in movi:
-        consequnce = move(bord, mv[0], mv[1])
+        consequnce = move(bord, mv["peon"], mv["kind"])
         score = consequnce.score()
         mv = (mv[0], mv[1], score)
         back.append(mv)
@@ -125,19 +124,18 @@ def movi_score(movi, bord):
 
 def distance(kind):
     """returns int value for each kind of move"""
-    if kind == 'jump':
-        return 2
-    elif kind == 'step':
-        return 1
-    else:
+    distdic = {"jump": 2, "step": 1}
+    try:
+        return distdic[kind]
+    except KeyError:
         raise ValueError
 
 
 def move(bord, p, kind):
     """returns a new board object repesenting the state after the move is taken"""
     # deepcopy is used to let us to look ahead at future boards without changing the current one
-    n_bord = deepcopy(bord.val)
-    place = n_bord.index(p)
+    n_bord = deepcopy(bord.order)
+    place = bord.order.index(p)
     n_bord[place + distance(kind) * p.dir] = p
     n_bord[place] = bord.emp
     return Board(n_bord, bord.emp)
@@ -156,7 +154,7 @@ def game():
         movi = list_moves(bord)
         try:
             ch = random_choice(movi)
-            bord = move(bord, ch[0], ch[1])
+            bord.order = move(bord, ch["peon"], ch["kind"]).order
         except IndexError:
             cont = False
         print(bord)
