@@ -31,7 +31,7 @@ class Peon:
     # we won't need to make special case for it and it won't find another blank peon in that direction.
 
     def place(self):
-        return self.bord.place(self)
+        return self.bord.place(self.id)
 
     def step_dest(self):
         return self.bord.step_dest(self)
@@ -62,20 +62,23 @@ class Board:
         """returns human readable list of unique peons"""
         return str(self.order)
 
-    def place(self, p: Peon):
+    def place(self, p_id: str):
         """retruns the the index (int) of a peon on the bord from grey side to black side"""
-        return self.order.index(p.id)
+        return self.order.index(p_id)
+
+    def peon_order(self):
+        return [self.cntnt[p] for p in self.order]
 
     def step_dest(self, p: Peon):
         try:
-            dest_id = self.order[self.place(p) + p.dir]  # a place one step to the left or to the right
+            dest_id = self.order[self.place(p.id) + p.dir]  # a place one step to the left or to the right
             return self.cntnt[dest_id]
         except IndexError:
             return None
 
     def jump_dest(self, p: Peon):
         try:
-            dest_id = self.order[self.place(p) + p.dir * 2]  # a place two steps to the left or to the right
+            dest_id = self.order[self.place(p.id) + p.dir * 2]  # a place two steps to the left or to the right
             return self.cntnt[dest_id]
         except IndexError:
             return None
@@ -98,8 +101,7 @@ def list_moves(bord: Board):
     a pair of a peon object, a string for kind of move,
     and an int for the score of the move"""
     movi = []
-    for p in bord.order:
-        p = bord.cntnt[p]  # get peon from id
+    for p in bord.peon_order():
         if p.color == ' ':
             continue
         if p.is_step():
@@ -195,4 +197,3 @@ print(joe)
 #  the game function call the peons to actually make the moves, and update Board.
 #  -
 #  score does need to be a board method
-
