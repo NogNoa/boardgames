@@ -58,27 +58,25 @@ class Board:
         self.order = [p.id for p in order]
         self.emp = emp
 
-    def peons_asosiate(self):
-        for p in self.order:
-            p.set_bord(self)
-
     def __str__(self):
         """returns human readable list of unique peons"""
         return str(self.order)
 
     def place(self, p: Peon):
         """retruns the the index (int) of a peon on the bord from grey side to black side"""
-        return self.order.index(p)
+        return self.order.index(p.id)
 
     def step_dest(self, p: Peon):
         try:
-            return self.order[self.place(p) + p.dir]  # a place one step to the left or to the right
+            dest_id = self.order[self.place(p) + p.dir]  # a place one step to the left or to the right
+            return self.cntnt[dest_id]
         except IndexError:
             return None
 
     def jump_dest(self, p: Peon):
         try:
-            return self.order[self.place(p) + p.dir * 2]  # a place two steps to the left or to the right
+            dest_id = self.order[self.place(p) + p.dir * 2]  # a place two steps to the left or to the right
+            return self.cntnt[dest_id]
         except IndexError:
             return None
 
@@ -152,7 +150,8 @@ def game():
     openning.append(emp)
     openning.extend([Peon('b', i + 5) for i in range(4)])
     bord = Board(openning, emp)
-    bord.peons_asosiate()
+    for p in openning:
+        p.set_bord(bord)
     print(bord)
     cont = True
     while cont:
@@ -194,3 +193,6 @@ print(joe)
 #  -
 #  clear separation of work. Board is just a phone book to find other Peons,
 #  the game function call the peons to actually make the moves, and update Board.
+#  -
+#  score does need to be a board method
+
