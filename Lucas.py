@@ -1,5 +1,4 @@
 from random import choice
-from copy import deepcopy
 
 
 class Peon:
@@ -52,31 +51,26 @@ class Peon:
 
 class Board:
     def __init__(self, order: list, emp):
-        self.val = self.order = order
+        self.cntnt = {}
+        for p in order:
+            self.cntnt[p.id] = p
+        self.order = tuple([p.id for p in order])
         self.emp = emp
 
     def peons_asosiate(self):
         for p in self.order:
             p.set_bord(self)
 
+    def update(self, n_order):
+        self.order = tuple(n_order)
+
     def __str__(self):
         """returns human readable list of unique peons"""
-        return str(self.val)
+        return str(self.order)
 
     def place(self, p: Peon):
         """retruns the the index (int) of a peon on the bord from grey side to black side"""
-        return self.val.index(p)
-
-    def score(self):
-        back = 0
-        for p in self.val:
-            point = self.place(p)
-            if p.color == 'b':
-                point = len(self.val) - point - 1
-            elif p.color == ' ':
-                point = 0
-            back += point
-        return back
+        return self.order.index(p)
 
     def step_dest(self, p: Peon):
         try:
@@ -91,12 +85,25 @@ class Board:
             return None
 
 
+def score(order):
+    back = 0
+    for p in order:
+        point = p.place()
+        if p.color == 'b':
+            point = len(order) - point - 1
+        elif p.color == ' ':
+            point = 0
+        back += point
+    return back
+
+
 def list_moves(bord: Board):
     """returns list of possible moves. each move formated as
     a pair of a peon object, a string for kind of move,
     and an int for the score of the move"""
     movi = []
-    for p in bord.val:
+    for p in bord.order:
+        p = bord.cntnt[p]  # get peon from id
         if p.color == ' ':
             continue
         if p.is_step():
@@ -116,8 +123,8 @@ def movi_score(movi, bord):
     back = []
     for mv in movi:
         consequnce = move(bord, mv["peon"], mv["kind"])
-        score = consequnce.score()
-        mv = (mv[0], mv[1], score)
+        scr = score(consequnce)
+        mv = (mv[0], mv[1], scr)
         back.append(mv)
     return back
 
@@ -134,11 +141,11 @@ def distance(kind):
 def move(bord, p, kind):
     """returns a new board object repesenting the state after the move is taken"""
     # deepcopy is used to let us to look ahead at future boards without changing the current one
-    n_bord = deepcopy(bord.order)
-    place = bord.order.index(p)
+    n_bord = list(bord.order)
+    place = bord.order.index(p.id)
     n_bord[place + distance(kind) * p.dir] = p
     n_bord[place] = bord.emp
-    return Board(n_bord, bord.emp)
+    return n_bord
 
 
 def game():
@@ -154,11 +161,11 @@ def game():
         movi = list_moves(bord)
         try:
             ch = random_choice(movi)
-            bord.order = move(bord, ch["peon"], ch["kind"]).order
+            bord.update(move(bord, ch["peon"], ch["kind"]))
         except IndexError:
             cont = False
         print(bord)
-        print(bord.score())
+        print(score(bord.order))
 
 
 def random_choice(movi):
