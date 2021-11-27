@@ -1,3 +1,4 @@
+from copy import deepcopy
 from random import choice
 
 
@@ -54,15 +55,12 @@ class Board:
         self.cntnt = {}
         for p in order:
             self.cntnt[p.id] = p
-        self.order = tuple([p.id for p in order])
+        self.order = [p.id for p in order]
         self.emp = emp
 
     def peons_asosiate(self):
         for p in self.order:
             p.set_bord(self)
-
-    def update(self, n_order):
-        self.order = tuple(n_order)
 
     def __str__(self):
         """returns human readable list of unique peons"""
@@ -141,7 +139,7 @@ def distance(kind):
 def move(bord, p, kind):
     """returns a new board object repesenting the state after the move is taken"""
     # deepcopy is used to let us to look ahead at future boards without changing the current one
-    n_bord = list(bord.order)
+    n_bord = deepcopy(bord.order)
     place = bord.order.index(p.id)
     n_bord[place + distance(kind) * p.dir] = p
     n_bord[place] = bord.emp
@@ -161,7 +159,7 @@ def game():
         movi = list_moves(bord)
         try:
             ch = random_choice(movi)
-            bord.update(move(bord, ch["peon"], ch["kind"]))
+            bord.order = move(bord, ch["peon"], ch["kind"])
         except IndexError:
             cont = False
         print(bord)
