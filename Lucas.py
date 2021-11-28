@@ -5,13 +5,13 @@ from random import choice
 class Peon:
     def __init__(self, color, ordinal):
         self.color = color
-        self.ordinal = ordinal
         self.id = color + str(ordinal)
         self.dir = self.dir()
-        self.bord = None
+        self.bord = self.cntnt = None
 
-    def set_bord(self, bord):
+    def set_contacts(self, bord, cntnt):
         self.bord = bord
+        self.cntnt = cntnt
 
     def __str__(self):
         return self.id
@@ -34,10 +34,10 @@ class Peon:
         return self.bord.place(self.id)
 
     def step_dest(self):
-        return self.bord.step_dest(self)
+        return self.cntnt.peon_find(self.bord.step_dest(self))
 
     def jump_dest(self):
-        return self.bord.jump_dest(self)
+        return self.cntnt.peon_find(self.bord.step_dest(self))
 
     def is_step(self) -> bool:
         """returns boolean value of is it possible for a peon to move one space"""
@@ -52,9 +52,7 @@ class Peon:
 
 class Content:
     def __init__(self, peoni: set):
-        self.val = {}
-        for p in peoni:
-            self.val[p.id] = p
+        self.val = {p.id: p for p in peoni}
 
     def peon_find(self, pid: str):
         return self.val[pid]
@@ -62,7 +60,7 @@ class Content:
 
 class Board:
     def __init__(self, order: list, emp):
-        self.order = [p.id for p in order]
+        self.order = order
         self.emp = emp
 
     def __str__(self):
@@ -72,9 +70,6 @@ class Board:
     def place(self, p_id: str):
         """retruns the the index (int) of a peon on the bord from grey side to black side"""
         return self.order.index(p_id)
-
-    def peon_order(self, cntnt: Content):
-        return [cntnt.peon_find(pid) for pid in self.order]
 
     def step_dest(self, p: Peon):
         try:
@@ -91,9 +86,10 @@ class Board:
             return None
 
 
-def score(order):
+def score(order, cntnt):
     back = 0
     for p in order:
+        p = cntnt.peon_find(p)
         point = p.place()
         if p.color == 'b':
             point = len(order) - point - 1
@@ -103,19 +99,20 @@ def score(order):
     return back
 
 
-def list_moves(bord: Board):
+def list_moves(bord: Board, cntnt: Content):
     """returns list of possible moves. each move formated as
     a pair of a peon object, a string for kind of move,
     and an int for the score of the move"""
     movi = []
-    for p in bord.peon_order():
+    for p in bord.order:
+        p = cntnt.peon_find(p)
         if p.color == ' ':
             continue
         if p.is_step():
             movi.append({'peon': p, 'kind': 'step'})
         if p.is_jump():
             movi.append({'peon': p, 'kind': 'jump'})
-    movi = movi_score(movi, bord)
+    movi = movi_score(movi, bord, cntnt)
     return movi
 
 
@@ -123,12 +120,12 @@ def list_moves(bord: Board):
 # it might make prior blank direction hack unnecessary.
 
 
-def movi_score(movi, bord):
+def movi_score(movi: list, bord: Board, cntnt: Content):
     """take a list of moves without a score and adds a score"""
     back = []
     for mv in movi:
         consequnce = move(bord, mv["peon"], mv["kind"])
-        scr = score(consequnce)
+        scr = score(consequnce, cntnt)
         mv = (mv[0], mv[1], scr)
         back.append(mv)
     return back
@@ -159,20 +156,21 @@ def game():
     openning.append(emp)
     openning.extend([Peon('b', i + 5) for i in range(4)])
     cntnt = Content(set(openning))
-    bord = Board(openning, emp)
+    openid = [p.id for p in openning]
+    bord = Board(openid, emp)
     for p in openning:
-        p.set_bord(bord)
+        p.set_contacts(bord, cntnt)
     print(bord)
     cont = True
     while cont:
-        movi = list_moves(bord)
+        movi = list_moves(bord, cntnt)
         try:
             ch = random_choice(movi)
             bord.order = move(bord, ch["peon"], ch["kind"])
         except IndexError:
             cont = False
         print(bord)
-        print(score(bord.order))
+        print(score(bord.order, cntnt))
 
 
 def random_choice(movi):
