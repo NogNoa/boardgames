@@ -50,11 +50,18 @@ class Peon:
         return jump_dest is not None and jump_dest.color == ' '
 
 
+class Content:
+    def __init__(self, peoni: set):
+        self.val = {}
+        for p in peoni:
+            self.val[p.id] = p
+
+    def peon_find(self, pid: str):
+        return self.val[pid]
+
+
 class Board:
     def __init__(self, order: list, emp):
-        self.cntnt = {}
-        for p in order:
-            self.cntnt[p.id] = p
         self.order = [p.id for p in order]
         self.emp = emp
 
@@ -66,20 +73,20 @@ class Board:
         """retruns the the index (int) of a peon on the bord from grey side to black side"""
         return self.order.index(p_id)
 
-    def peon_order(self):
-        return [self.cntnt[p] for p in self.order]
+    def peon_order(self, cntnt: Content):
+        return [cntnt.peon_find(pid) for pid in self.order]
 
     def step_dest(self, p: Peon):
         try:
             dest_id = self.order[self.place(p.id) + p.dir]  # a place one step to the left or to the right
-            return self.cntnt[dest_id]
+            return dest_id
         except IndexError:
             return None
 
     def jump_dest(self, p: Peon):
         try:
             dest_id = self.order[self.place(p.id) + p.dir * 2]  # a place two steps to the left or to the right
-            return self.cntnt[dest_id]
+            return dest_id
         except IndexError:
             return None
 
@@ -151,6 +158,7 @@ def game():
     emp = (Peon(' ', 4))
     openning.append(emp)
     openning.extend([Peon('b', i + 5) for i in range(4)])
+    cntnt = Content(set(openning))
     bord = Board(openning, emp)
     for p in openning:
         p.set_bord(bord)
