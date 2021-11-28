@@ -145,8 +145,8 @@ def move(bord, p, kind):
     # deepcopy is used to let us to look ahead at future boards without changing the current one
     n_bord = deepcopy(bord.order)
     place = bord.order.index(p.id)
-    n_bord[place + distance(kind) * p.dir] = p
-    n_bord[place] = bord.emp
+    n_bord[place + distance(kind) * p.dir] = p.id
+    n_bord[place] = bord.emp.id
     return n_bord
 
 
