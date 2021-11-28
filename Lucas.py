@@ -126,7 +126,7 @@ def movi_score(movi: list, bord: Board, cntnt: Content):
     for mv in movi:
         consequnce = move(bord, mv["peon"], mv["kind"])
         scr = score(consequnce, cntnt)
-        mv = (mv[0], mv[1], scr)
+        mv[scr] = scr
         back.append(mv)
     return back
 
@@ -140,13 +140,13 @@ def distance(kind):
         raise ValueError
 
 
-def move(bord, p, kind):
+def move(bord, p, kind, empid=' 4'):
     """returns a new board object repesenting the state after the move is taken"""
     # deepcopy is used to let us to look ahead at future boards without changing the current one
     n_bord = deepcopy(bord.order)
     place = bord.order.index(p.id)
     n_bord[place + distance(kind) * p.dir] = p.id
-    n_bord[place] = bord.emp.id
+    n_bord[place] = empid
     return n_bord
 
 
@@ -178,7 +178,7 @@ def random_choice(movi):
 
 
 def single_max_choice(movi):
-    scori = [mov[2] for mov in movi]
+    scori = [mov['scr'] for mov in movi]
     best = max(scori)
     back = movi[scori.index(best)]
     return back
@@ -192,14 +192,4 @@ print(expose_bord(bord))
 joe = [i.is_step() for i in bord]
 print(joe)
 """
-# TODO: probably shouldn't create a new board in each move().
-#  Or else, let it identify same peon on different future boards.
-#  That's what the id is supposedly for.
-#  something is wonky in the hierarchy
-#  try opposite direction, get rid of Board object and make program more functional, with a list instead of Board.
-#  and control decentralised in the hands of each Peon.
-#  -
-#  clear separation of work. Board is just a phone book to find other Peons,
-#  the game function call the peons to actually make the moves, and update Board.
-#  -
-#  score does need to be a board method
+# TODO: impossible jumps
