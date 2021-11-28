@@ -7,11 +7,11 @@ class Peon:
         self.color = color
         self.id = color + str(ordinal)
         self.dir = self.dir()
-        self.bord = self.cntnt = None
+        self.bord = self.peon_find = None
 
-    def set_contacts(self, bord, cntnt):
+    def set_contacts(self, bord: object, pfind):
         self.bord = bord
-        self.cntnt = cntnt
+        self.peon_find = pfind
 
     def __str__(self):
         return self.id
@@ -34,10 +34,10 @@ class Peon:
         return self.bord.place(self.id)
 
     def step_dest(self):
-        return self.cntnt.peon_find(self.bord.step_dest(self))
+        return self.peon_find(self.bord.step_dest(self))
 
     def jump_dest(self):
-        return self.cntnt.peon_find(self.bord.step_dest(self))
+        return self.peon_find(self.bord.step_dest(self))
 
     def is_step(self) -> bool:
         """returns boolean value of is it possible for a peon to move one space"""
@@ -59,9 +59,8 @@ class Content:
 
 
 class Board:
-    def __init__(self, order: list, emp):
+    def __init__(self, order: list):
         self.order = order
-        self.emp = emp
 
     def __str__(self):
         """returns human readable list of unique peons"""
@@ -156,10 +155,10 @@ def game():
     openning.append(emp)
     openning.extend([Peon('b', i + 5) for i in range(4)])
     cntnt = Content(set(openning))
-    openid = [p.id for p in openning]
-    bord = Board(openid, emp)
+    openids = [p.id for p in openning]
+    bord = Board(openids)
     for p in openning:
-        p.set_contacts(bord, cntnt)
+        p.set_contacts(bord, cntnt.peon_find)
     print(bord)
     cont = True
     while cont:
@@ -167,10 +166,10 @@ def game():
         try:
             ch = random_choice(movi)
             bord.order = move(bord, ch["peon"], ch["kind"])
+            print(bord)
+            print(score(bord.order, cntnt))
         except IndexError:
             cont = False
-        print(bord)
-        print(score(bord.order, cntnt))
 
 
 def random_choice(movi):
