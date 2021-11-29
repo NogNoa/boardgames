@@ -85,14 +85,13 @@ class Board:
             return None
 
 
-def score(order, cntnt):
+def score(order):
     back = 0
-    for p in order:
-        p = cntnt.peon_find(p)
-        point = p.place()
-        if p.color == 'b':
+    for i, p in enumerate(order):
+        point = i
+        if p[0] == 'b':
             point = len(order) - point - 1
-        elif p.color == ' ':
+        elif p[0] == ' ':
             point = 0
         back += point
     return back
@@ -111,7 +110,7 @@ def list_moves(bord: Board, cntnt: Content):
             movi.append({'peon': p, 'kind': 'step'})
         if p.is_jump():
             movi.append({'peon': p, 'kind': 'jump'})
-    movi = movi_score(movi, bord, cntnt)
+    movi = movi_score(movi, bord)
     return movi
 
 
@@ -119,12 +118,12 @@ def list_moves(bord: Board, cntnt: Content):
 # it might make prior blank direction hack unnecessary.
 
 
-def movi_score(movi: list, bord: Board, cntnt: Content):
+def movi_score(movi: list, bord: Board):
     """take a list of moves without a score and adds a score"""
     back = deepcopy(movi)
     for mv in back:
         consequnce = move(bord, mv["peon"], mv["kind"])
-        scr = score(consequnce, cntnt)
+        scr = score(consequnce)
         mv['scr'] = scr
     return back
 
@@ -176,7 +175,7 @@ def game(choice_fun):
             ch = choice_fun(movi)
             bord.order = move(bord, ch["peon"], ch["kind"])
             print(bord)
-            print(score(bord.order, cntnt))
+            print(score(bord.order))
         except IndexError:
             cont = False
 
@@ -214,6 +213,7 @@ def center_max_choice(movi):
 
 def max_center_choice(movi):
     pass
+
 
 # priority from right to left
 
