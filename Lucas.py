@@ -37,7 +37,7 @@ class Peon:
         return self.peon_find(self.bord.step_dest(self))
 
     def jump_dest(self):
-        return self.peon_find(self.bord.step_dest(self))
+        return self.peon_find(self.bord.jump_dest(self))
 
     def is_step(self) -> bool:
         """returns boolean value of is it possible for a peon to move one space"""
@@ -125,7 +125,7 @@ def movi_score(movi: list, bord: Board, cntnt: Content):
     for mv in movi:
         consequnce = move(bord, mv["peon"], mv["kind"])
         scr = score(consequnce, cntnt)
-        mv[scr] = scr
+        mv['scr'] = scr
         back.append(mv)
     return back
 
@@ -177,6 +177,8 @@ def random_choice(movi):
 
 
 def single_max_choice(movi):
+    if not movi:
+        raise IndexError
     scori = [mov['scr'] for mov in movi]
     best = max(scori)
     back = movi[scori.index(best)]
