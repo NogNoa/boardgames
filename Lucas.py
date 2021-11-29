@@ -121,12 +121,21 @@ def list_moves(bord: Board, cntnt: Content):
 
 def movi_score(movi: list, bord: Board, cntnt: Content):
     """take a list of moves without a score and adds a score"""
-    back = []
-    for mv in movi:
+    back = deepcopy(movi)
+    for mv in back:
         consequnce = move(bord, mv["peon"], mv["kind"])
         scr = score(consequnce, cntnt)
         mv['scr'] = scr
-        back.append(mv)
+    return back
+
+
+def emp_center_scr(movi: list, bord: Board, empid=" 4"):
+    back = deepcopy(movi)
+    for mv in back:
+        consequence = move(bord, mv["peon"], mv["kind"])
+        emp_pl = consequence.index(empid)
+        scr = abs(4 - emp_pl)
+        mv['scr'] = scr
     return back
 
 
@@ -149,7 +158,7 @@ def move(bord, p, kind, empid=' 4'):
     return n_bord
 
 
-def game():
+def game(choice_fun):
     openning = [Peon('g', i) for i in range(4)]
     emp = (Peon(' ', 4))
     openning.append(emp)
@@ -164,7 +173,7 @@ def game():
     while cont:
         movi = list_moves(bord, cntnt)
         try:
-            ch = random_choice(movi)
+            ch = choice_fun(movi)
             bord.order = move(bord, ch["peon"], ch["kind"])
             print(bord)
             print(score(bord.order, cntnt))
@@ -176,7 +185,7 @@ def random_choice(movi):
     return choice(movi)
 
 
-def single_max_choice(movi):
+def first_max_choice(movi):
     if not movi:
         raise IndexError
     scori = [mov['scr'] for mov in movi]
@@ -185,8 +194,31 @@ def single_max_choice(movi):
     return back
 
 
+def rand_max_choice(movi):
+    if not movi:
+        raise IndexError
+    scori = [mov['scr'] for mov in movi]
+    best = max(scori)
+    besti = [pl for pl, scr in enumerate(scori) if scr == best]
+    back = movi[choice(besti)]
+    return back
+
+
+def emp_center_choice(movi):
+    pass
+
+
+def center_max_choice(movi):
+    pass
+
+
+def max_center_choice(movi):
+    pass
+
+# priority from right to left
+
 if __name__ == "__main__":
-    game()
+    game(rand_max_choice)
 
 """
 print(expose_bord(bord))
