@@ -62,6 +62,9 @@ class Board:
     def __init__(self, order: list):
         self.order = order
 
+    def __getitem__(self, i):
+        return self.order[i]
+
     def __str__(self):
         """returns human readable list of unique peons"""
         return str(self.order)
@@ -102,7 +105,7 @@ def list_moves(bord: Board, cntnt: Content):
     a pair of a peon object, a string for kind of move,
     and an int for the score of the move"""
     movi = []
-    for p in bord.order:
+    for p in bord:
         p = cntnt.peon_find(p)
         if p.color == ' ':
             continue
@@ -225,4 +228,4 @@ print(expose_bord(bord))
 joe = [i.is_step() for i in bord]
 print(joe)
 """
-# TODO: impossible jumps
+
