@@ -55,6 +55,8 @@ class Content:
         self.val = {p.id: p for p in peoni}
 
     def peon_find(self, pid: str):
+        if pid is None:
+            return None
         return self.val[pid]
 
 
