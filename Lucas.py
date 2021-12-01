@@ -122,12 +122,12 @@ def list_moves(bord: Board, cntnt: Content):
 
 def movi_score(movi: list, bord: Board, scrfunc):
     """take a list of moves without a score and adds a score"""
-    back = deepcopy(movi)
-    for mv in back:
+    scori = []
+    for mv in movi:
         consequnce = move(bord, mv["peon"], mv["kind"])
         scr = scrfunc(consequnce)
-        mv['scr'] = scr
-    return back
+        scori.append(scr)
+    return scori
 
 
 def emp_center_scr(consq, empid=" 4"):
@@ -185,8 +185,7 @@ def random_choice(movi, bord):
 def first_max_choice(movi, bord):
     if not movi:
         raise IndexError
-    movi = movi_score(movi, bord, score)
-    scori = [mov['scr'] for mov in movi]
+    scori = movi_score(movi, bord, score)
     best = max(scori)
     back = movi[scori.index(best)]
     return back
@@ -195,8 +194,7 @@ def first_max_choice(movi, bord):
 def rand_max_choice(movi, bord):
     if not movi:
         raise IndexError
-    movi = movi_score(movi, bord, score)
-    scori = [mov['scr'] for mov in movi]
+    scori = movi_score(movi, bord, score)
     best = max(scori)
     besti = [pl for pl, scr in enumerate(scori) if scr == best]
     back = movi[choice(besti)]
@@ -206,21 +204,38 @@ def rand_max_choice(movi, bord):
 def emp_center_choice(movi, bord):
     if not movi:
         raise IndexError
-    movi = movi_score(movi, bord, emp_center_scr)
-    scori = [mov['scr'] for mov in movi]
+    scori = movi_score(movi, bord, emp_center_scr)
     best = max(scori)
     besti = [pl for pl, scr in enumerate(scori) if scr == best]
     back = movi[choice(besti)]
     return back
 
+"""
+def center_max_choice(movi,bord):
+    if not movi:
+        raise IndexError
+    scori = movi_score(movi, bord, score)
+    centri = movi_score(movi, bord, emp_center_scr)
+    best_score = max(scori)
+    best_center = max(centri)
+    besti = [pl for pl, scr in enumerate(scori) if scr == best_score]
+    besti = [pl for pl, scr in enumerate(besti) if scr == best_center]
+    back = movi[choice(besti)]
+    return back
 
-def center_max_choice(movi):
-    pass
 
-
-def max_center_choice(movi):
-    pass
-
+def max_center_choice(movi, bord):
+    if not movi:
+        raise IndexError
+    scori = movi_score(movi, bord, score)
+    centri = movi_score(movi, bord, emp_center_scr)
+    best_score = max(scori)
+    best_center = max(centri)
+    besti = [pl for pl, scr in enumerate(centri) if scr == best_center]
+    besti = [pl for pl, scr in enumerate(besti) if scr == best_score]
+    back = movi[choice(besti)]
+    return back
+"""
 
 # priority from right to left
 
