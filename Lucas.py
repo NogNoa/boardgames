@@ -113,7 +113,6 @@ def list_moves(bord: Board, cntnt: Content):
             movi.append({'peon': p, 'kind': 'step'})
         if p.is_jump():
             movi.append({'peon': p, 'kind': 'jump'})
-    movi = movi_score(movi, bord)
     return movi
 
 
@@ -175,7 +174,7 @@ def game(choice_fun):
     while cont:
         movi = list_moves(bord, cntnt)
         try:
-            ch = choice_fun(movi)
+            ch = choice_fun(movi, bord)
             bord.order = move(bord, ch["peon"], ch["kind"])
             print(bord)
             print(score(bord.order))
@@ -183,22 +182,24 @@ def game(choice_fun):
             cont = False
 
 
-def random_choice(movi):
+def random_choice(movi, bord):
     return choice(movi)
 
 
-def first_max_choice(movi):
+def first_max_choice(movi, bord):
     if not movi:
         raise IndexError
+    movi = movi_score(movi, bord)
     scori = [mov['scr'] for mov in movi]
     best = max(scori)
     back = movi[scori.index(best)]
     return back
 
 
-def rand_max_choice(movi):
+def rand_max_choice(movi, bord):
     if not movi:
         raise IndexError
+    movi = movi_score(movi, bord)
     scori = [mov['scr'] for mov in movi]
     best = max(scori)
     besti = [pl for pl, scr in enumerate(scori) if scr == best]
@@ -206,8 +207,15 @@ def rand_max_choice(movi):
     return back
 
 
-def emp_center_choice(movi):
-    pass
+def emp_center_choice(movi, bord):
+    if not movi:
+        raise IndexError
+    movi = emp_center_scr(movi, bord)
+    scori = [mov['scr'] for mov in movi]
+    best = max(scori)
+    besti = [pl for pl, scr in enumerate(scori) if scr == best]
+    back = movi[choice(besti)]
+    return back
 
 
 def center_max_choice(movi):
