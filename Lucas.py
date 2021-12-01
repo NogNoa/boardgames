@@ -120,24 +120,20 @@ def list_moves(bord: Board, cntnt: Content):
 # it might make prior blank direction hack unnecessary.
 
 
-def movi_score(movi: list, bord: Board):
+def movi_score(movi: list, bord: Board, scrfunc):
     """take a list of moves without a score and adds a score"""
     back = deepcopy(movi)
     for mv in back:
         consequnce = move(bord, mv["peon"], mv["kind"])
-        scr = score(consequnce)
+        scr = scrfunc(consequnce)
         mv['scr'] = scr
     return back
 
 
-def emp_center_scr(movi: list, bord: Board, empid=" 4"):
-    back = deepcopy(movi)
-    for mv in back:
-        consequence = move(bord, mv["peon"], mv["kind"])
-        emp_pl = consequence.index(empid)
-        scr = abs(4 - emp_pl)
-        mv['scr'] = scr
-    return back
+def emp_center_scr(consq, empid=" 4"):
+    emp_pl = consq.index(empid)
+    scr = abs(4 - emp_pl)
+    return scr
 
 
 def distance(kind):
@@ -189,7 +185,7 @@ def random_choice(movi, bord):
 def first_max_choice(movi, bord):
     if not movi:
         raise IndexError
-    movi = movi_score(movi, bord)
+    movi = movi_score(movi, bord, score)
     scori = [mov['scr'] for mov in movi]
     best = max(scori)
     back = movi[scori.index(best)]
@@ -199,7 +195,7 @@ def first_max_choice(movi, bord):
 def rand_max_choice(movi, bord):
     if not movi:
         raise IndexError
-    movi = movi_score(movi, bord)
+    movi = movi_score(movi, bord, score)
     scori = [mov['scr'] for mov in movi]
     best = max(scori)
     besti = [pl for pl, scr in enumerate(scori) if scr == best]
@@ -210,7 +206,7 @@ def rand_max_choice(movi, bord):
 def emp_center_choice(movi, bord):
     if not movi:
         raise IndexError
-    movi = emp_center_scr(movi, bord)
+    movi = movi_score(movi, bord, emp_center_scr)
     scori = [mov['scr'] for mov in movi]
     best = max(scori)
     besti = [pl for pl, scr in enumerate(scori) if scr == best]
