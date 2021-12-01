@@ -210,15 +210,15 @@ def emp_center_choice(movi, bord):
     back = movi[choice(besti)]
     return back
 
-"""
+
 def center_max_choice(movi,bord):
     if not movi:
         raise IndexError
     scori = movi_score(movi, bord, score)
     centri = movi_score(movi, bord, emp_center_scr)
     best_score = max(scori)
+    besti = [scr if scori[pl] == best_score else 0 for pl, scr in enumerate(centri)]
     best_center = max(centri)
-    besti = [pl for pl, scr in enumerate(scori) if scr == best_score]
     besti = [pl for pl, scr in enumerate(besti) if scr == best_center]
     back = movi[choice(besti)]
     return back
@@ -229,15 +229,15 @@ def max_center_choice(movi, bord):
         raise IndexError
     scori = movi_score(movi, bord, score)
     centri = movi_score(movi, bord, emp_center_scr)
-    best_score = max(scori)
     best_center = max(centri)
-    besti = [pl for pl, scr in enumerate(centri) if scr == best_center]
+    besti = [scr if centri[pl] == best_center else 0 for pl, scr in enumerate(scori)]
+    best_score = max(scori)
     besti = [pl for pl, scr in enumerate(besti) if scr == best_score]
     back = movi[choice(besti)]
     return back
-"""
 
-# priority from right to left
+
+# priority in function names from right to left
 
 if __name__ == "__main__":
     game(rand_max_choice)
