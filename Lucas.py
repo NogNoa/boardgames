@@ -246,7 +246,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('choice', metavar="C", help="Algorithm to decide the moves")
+    parser.add_argument('choice', metavar="C", help="Algorithm to decide the moves", default="random")
     parser.add_argument("-d", help="turn on debug mode", action="store_true", )
     args = parser.parse_args()
     choices = {"max_center", "random", "first_max", "rand_max", "emp_cent", "center_max"}
@@ -254,10 +254,7 @@ if __name__ == "__main__":
     if args.choice not in choices:
         print("please enter a valid decision algorithm:\n\t", str(choices)[1:-1])
         exit(0)
-    kwargs = {"choice_fun": args.choice}
-    if args.d:
-        kwargs["dbg"] = True
-    game(**kwargs)
+    game(args.choice, args.d)
 
 """
 print(expose_bord(bord))
