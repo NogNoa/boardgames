@@ -243,18 +243,20 @@ def max_center_choice(movi, bord):
 # priority in function names from right to left
 
 if __name__ == "__main__":
-    import argparse
+    def main():
+        import argparse
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('choice', metavar="C", help="Algorithm to decide the moves", default="random")
-    parser.add_argument("-d", help="turn on debug mode", action="store_true", )
-    args = parser.parse_args()
-    choices = {"max_center", "random", "first_max", "rand_max", "emp_cent", "center_max"}
+        parser = argparse.ArgumentParser()
+        parser.add_argument('choice', metavar="C", help="Algorithm to decide the moves", default="random")
+        parser.add_argument("-d", help="turn on debug mode", action="store_true", )
+        args = parser.parse_args()
+        choices = {"max_center", "random", "first_max", "rand_max", "emp_cent", "center_max"}
 
-    if args.choice not in choices:
-        print("please enter a valid decision algorithm:\n\t", str(choices)[1:-1])
-        exit(0)
-    game(args.choice, args.d)
+        if args.choice not in choices:
+            print("please enter a valid decision algorithm:\n\t", str(choices)[1:-1])
+            exit(0)
+        game(args.choice, args.d)
+    main()
 
 """
 print(expose_bord(bord))
