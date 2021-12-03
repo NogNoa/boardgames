@@ -28,7 +28,7 @@ class Peon:
             return None
 
     # minor hack: giving the blank peon non-zero direction. since there's only one blank peon
-    # we won't need to make special case for it and it won't find another blank peon in that direction.
+    # we won't need to make special case for it, and it won't find another blank peon in that direction.
 
     def place(self):
         return self.bord.place(self.id)
@@ -72,7 +72,7 @@ class Board:
         return str(self.order)
 
     def place(self, p_id: str):
-        """retruns the the index (int) of a peon on the bord from grey side to black side"""
+        """retruns the index (int) of a peon on the bord from grey side to black side"""
         return self.order.index(p_id)
 
     def step_dest(self, p: Peon):
@@ -149,7 +149,7 @@ def distance(kind):
 
 def move(bord, p, kind, empid=' 4'):
     """returns a new board object repesenting the state after the move is taken"""
-    # deepcopy is used to let us to look ahead at future boards without changing the current one
+    # deepcopy is used to let us look ahead at future boards without changing the current one
     n_bord = deepcopy(bord.order)
     place = bord.order.index(p.id)
     n_bord[place + distance(kind) * p.dir] = p.id
@@ -180,7 +180,7 @@ def game(choice_fun):
             cont = False
 
 
-def random_choice(movi, bord):
+def random_choice(movi, _):
     return choice(movi)
 
 
@@ -236,6 +236,7 @@ def max_center_choice(movi, bord):
     best_score = max(besti)
     besti = [pl for pl, scr in enumerate(besti) if scr == best_score]
     back = movi[choice(besti)]
+
     return back
 
 
