@@ -158,7 +158,7 @@ def move(bord, p, kind, empid=' 4'):
     return n_bord
 
 
-def game(choice_fun, dbg=False):
+def game(choice_fun="random", dbg=False):
     openning = [Peon('g', i) for i in range(4)]
     emp = (Peon(' ', 4))
     openning.append(emp)
@@ -173,7 +173,7 @@ def game(choice_fun, dbg=False):
     while cont:
         movi = list_moves(bord, cntnt)
         try:
-            ch = choice_fun(movi, bord)
+            ch = exec(choice_fun+"_choice")(movi, bord)
             bord.order = move(bord, ch["peon"], ch["kind"])
             print(bord)
             if dbg: print(score(bord.order))
@@ -254,10 +254,10 @@ if __name__ == "__main__":
     if args.choice not in choices.add(None):
         print("please enter a valid decision algorithm:\n\t", str(choices)[1:-1])
         exit(0)
-    argv = (args.choice,)
+    kwargs = {"choice_fun": args.choice}
     if args.d:
-        argv = argv + (True,)
-        game(*argv)
+        kwargs["dbg"] = True
+    game(**kwargs)
 
 """
 print(expose_bord(bord))
