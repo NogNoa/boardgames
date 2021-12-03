@@ -173,7 +173,7 @@ def game(choice_fun="random", dbg=False):
     while cont:
         movi = list_moves(bord, cntnt)
         try:
-            ch = exec(choice_fun+"_choice")(movi, bord)
+            ch = eval(f"{choice_fun}_choice(movi, bord)")
             bord.order = move(bord, ch["peon"], ch["kind"])
             print(bord)
             if dbg: print(score(bord.order))
@@ -251,7 +251,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     choices = {"max_center", "random", "first_max", "rand_max", "emp_cent", "center_max"}
 
-    if args.choice not in choices.add(None):
+    if args.choice not in choices:
         print("please enter a valid decision algorithm:\n\t", str(choices)[1:-1])
         exit(0)
     kwargs = {"choice_fun": args.choice}
