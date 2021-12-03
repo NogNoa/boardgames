@@ -55,9 +55,10 @@ class Content:
         self.val = {p.id: p for p in peoni}
 
     def peon_find(self, pid: str):
-        if pid is None:
+        try:
+            return self.val[pid]
+        except KeyError:
             return None
-        return self.val[pid]
 
 
 class Board:
@@ -134,7 +135,7 @@ def movi_score(movi: list, bord: Board, scrfunc):
 
 def emp_center_scr(consq, empid=" 4"):
     emp_pl = consq.index(empid)
-    scr = 4-abs(4 - emp_pl)
+    scr = 4 - abs(4 - emp_pl)
     return scr
 
 
@@ -157,7 +158,7 @@ def move(bord, p, kind, empid=' 4'):
     return n_bord
 
 
-def game(choice_fun):
+def game(choice_fun, dbg=False):
     openning = [Peon('g', i) for i in range(4)]
     emp = (Peon(' ', 4))
     openning.append(emp)
@@ -175,7 +176,7 @@ def game(choice_fun):
             ch = choice_fun(movi, bord)
             bord.order = move(bord, ch["peon"], ch["kind"])
             print(bord)
-            print(score(bord.order))
+            if dbg: print(score(bord.order))
         except IndexError:
             cont = False
 
@@ -216,10 +217,10 @@ def emp_center_choice(movi, bord):
 def center_max_choice(movi, bord):
     if not movi:
         raise IndexError
-    scori = movi_score(movi, bord, score)
+    maxi = movi_score(movi, bord, score)
     centri = movi_score(movi, bord, emp_center_scr)
-    best_score = max(scori)
-    besti = [scr if scori[pl] == best_score else 0 for pl, scr in enumerate(centri)]
+    best_score = max(maxi)
+    besti = [scr if maxi[pl] == best_score else 0 for pl, scr in enumerate(centri)]
     best_center = max(besti)
     besti = [pl for pl, scr in enumerate(besti) if scr == best_center]
     back = movi[choice(besti)]
@@ -229,21 +230,34 @@ def center_max_choice(movi, bord):
 def max_center_choice(movi, bord):
     if not movi:
         raise IndexError
-    scori = movi_score(movi, bord, score)
+    maxi = movi_score(movi, bord, score)
     centri = movi_score(movi, bord, emp_center_scr)
     best_center = max(centri)
-    besti = [scr if centri[pl] == best_center else 0 for pl, scr in enumerate(scori)]
+    besti = [scr if centri[pl] == best_center else 0 for pl, scr in enumerate(maxi)]
     best_score = max(besti)
     besti = [pl for pl, scr in enumerate(besti) if scr == best_score]
     back = movi[choice(besti)]
-
     return back
 
 
 # priority in function names from right to left
 
 if __name__ == "__main__":
-    game(max_center_choice)
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('choice', metavar="C", help="Algorithm to decide the moves")
+    parser.add_argument("-d", help="turn on debug mode", action="store_true", )
+    args = parser.parse_args()
+    choices = {"max_center", "random", "first_max", "rand_max", "emp_cent", "center_max"}
+
+    if args.choice not in choices.add(None):
+        print("please enter a valid decision algorithm:\n\t", str(choices)[1:-1])
+        exit(0)
+    argv = (args.choice,)
+    if args.d:
+        argv = argv + (True,)
+        game(*argv)
 
 """
 print(expose_bord(bord))
