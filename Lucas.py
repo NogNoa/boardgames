@@ -123,11 +123,11 @@ def list_moves(bord: Board, cntnt: Content):
 # it might make prior blank direction hack unnecessary.
 
 
-def movi_score(movi: list, bord: Board, scrfunc):
+def movi_score(movi: list, bord: Board, cntnt: Content, scrfunc):
     """take a list of moves without a score and adds a score"""
     scori = []
     for mv in movi:
-        consequnce = move(bord, mv["peon"], mv["kind"])
+        consequnce = move(bord, cntnt, mv)
         scr = scrfunc(consequnce)
         scori.append(scr)
     return scori
@@ -148,9 +148,11 @@ def distance(kind: str):
         raise ValueError
 
 
-def move(bord: Board, p: str, kind: str, empid=' 4'):
+def move(bord: Board, cntnt: Content, mv: dict, empid=' 4'):
     """returns a new board object repesenting the state after the move is taken"""
     # deepcopy is used to let us look ahead at future boards without changing the current one
+    pid, kind = mv["peon"], mv["kind"]
+    p = cntnt.peon_find(pid)
     n_bord = deepcopy(bord.order)
     place = bord.order.index(p.id)
     n_bord[place + distance(kind) * p.dir] = p.id
@@ -173,52 +175,52 @@ def game(choice_fun="random", dbg=False):
     while cont:
         movi = list_moves(bord, cntnt)
         try:
-            ch = eval(f"{choice_fun}_choice(movi, bord)")
-            bord.order = move(bord, ch["peon"], ch["kind"])
+            ch = eval(f"{choice_fun}_choice(movi, bord, cntnt)")
+            bord.order = move(bord, cntnt, ch)
             print(bord)
             if dbg: print(score(bord.order))
         except IndexError:
             cont = False
 
 
-def random_choice(movi, _):
+def random_choice(movi, _, __):
     return choice(movi)
 
 
-def first_max_choice(movi, bord):
+def first_max_choice(movi, bord, cntnt):
     if not movi:
         raise IndexError
-    scori = movi_score(movi, bord, score)
+    scori = movi_score(movi, bord, cntnt, score)
     best = max(scori)
     back = movi[scori.index(best)]
     return back
 
 
-def rand_max_choice(movi, bord):
+def rand_max_choice(movi, bord, cntnt):
     if not movi:
         raise IndexError
-    scori = movi_score(movi, bord, score)
+    scori = movi_score(movi, bord, cntnt, score)
     best = max(scori)
     besti = [pl for pl, scr in enumerate(scori) if scr == best]
     back = movi[choice(besti)]
     return back
 
 
-def emp_center_choice(movi, bord):
+def emp_center_choice(movi, bord, cntnt):
     if not movi:
         raise IndexError
-    scori = movi_score(movi, bord, emp_center_scr)
+    scori = movi_score(movi, bord, cntnt, emp_center_scr)
     best = max(scori)
     besti = [pl for pl, scr in enumerate(scori) if scr == best]
     back = movi[choice(besti)]
     return back
 
 
-def center_max_choice(movi, bord):
+def center_max_choice(movi, bord, cntnt):
     if not movi:
         raise IndexError
-    maxi = movi_score(movi, bord, score)
-    centri = movi_score(movi, bord, emp_center_scr)
+    maxi = movi_score(movi, bord, cntnt, score)
+    centri = movi_score(movi, bord, cntnt, emp_center_scr)
     best_score = max(maxi)
     besti = [scr if maxi[pl] == best_score else 0 for pl, scr in enumerate(centri)]
     best_center = max(besti)
@@ -227,11 +229,11 @@ def center_max_choice(movi, bord):
     return back
 
 
-def max_center_choice(movi, bord):
+def max_center_choice(movi, bord, cntnt):
     if not movi:
         raise IndexError
-    maxi = movi_score(movi, bord, score)
-    centri = movi_score(movi, bord, emp_center_scr)
+    maxi = movi_score(movi, bord, cntnt, score)
+    centri = movi_score(movi, bord, cntnt, emp_center_scr)
     best_center = max(centri)
     besti = [scr if centri[pl] == best_center else 0 for pl, scr in enumerate(maxi)]
     best_score = max(besti)
@@ -240,10 +242,11 @@ def max_center_choice(movi, bord):
     return back
 
 
-def interactive_choice(movi, bord):
+def interactive_choice(movi, bord, _=None):
     if not movi:
         raise IndexError
-    hlp = """A valid move is the name of a paon, followed by "step" for a move of 1 or "jump" for a move of 2"""
+    hlp = """A valid move is the name of a paon, followed by space and "step" for a move of 1 or "jump" for a move of 
+    2 """
     move = input("Move?\n > ").lower()
     move = move.split()
     if len(move) >= 2:
@@ -256,7 +259,7 @@ def interactive_choice(movi, bord):
         print(hlp)
         return interactive_choice(movi, bord)
     else:
-        print('please enter a vlid move.  If you need help just enter "help".')
+        print('please enter a valid move.  If you need help just enter "help".')
         return interactive_choice(movi, bord)
 
 
