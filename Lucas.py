@@ -113,9 +113,9 @@ def list_moves(bord: Board, cntnt: Content):
         if p.color == ' ':
             continue
         if p.is_step():
-            movi.append({'peon': p, 'kind': 'step'})
+            movi.append({'peon': p.id, 'kind': 'step'})
         if p.is_jump():
-            movi.append({'peon': p, 'kind': 'jump'})
+            movi.append({'peon': p.id, 'kind': 'jump'})
     return movi
 
 
@@ -148,7 +148,7 @@ def distance(kind: str):
         raise ValueError
 
 
-def move(bord: Board, p: Peon, kind: str, empid=' 4'):
+def move(bord: Board, p: str, kind: str, empid=' 4'):
     """returns a new board object repesenting the state after the move is taken"""
     # deepcopy is used to let us look ahead at future boards without changing the current one
     n_bord = deepcopy(bord.order)
@@ -285,3 +285,8 @@ print(expose_bord(bord))
 joe = [i.is_step() for i in bord]
 print(joe)
 """
+
+# todo: integrate move into peon? pass content into move so in can retrieve peon?
+#   On one hand I want to make peon less exposed and on the other I want to make it responsible.
+#   Somewhat contradicting.
+#   otherwise I need to pass content to interactive choice
