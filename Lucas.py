@@ -139,7 +139,7 @@ def emp_center_scr(consq, empid=" 4"):
     return scr
 
 
-def distance(kind):
+def distance(kind: str):
     """returns int value for each kind of move"""
     distdic = {"jump": 2, "step": 1}
     try:
@@ -148,7 +148,7 @@ def distance(kind):
         raise ValueError
 
 
-def move(bord, p, kind, empid=' 4'):
+def move(bord: Board, p: Peon, kind: str, empid=' 4'):
     """returns a new board object repesenting the state after the move is taken"""
     # deepcopy is used to let us look ahead at future boards without changing the current one
     n_bord = deepcopy(bord.order)
@@ -240,6 +240,26 @@ def max_center_choice(movi, bord):
     return back
 
 
+def interactive_choice(movi, bord):
+    if not movi:
+        raise IndexError
+    hlp = """A valid move is the name of a paon, followed by "step" for a move of 1 or "jump" for a move of 2"""
+    move = input("Move?\n > ").lower()
+    move = move.split()
+    if len(move) >= 2:
+        move = {"peon": move[0], "kind": move[1]}
+        if move["kind"] in {'j', 's'}:
+            move["kind"] = {'j': "jump", "s": "step"}[move["kind"]]
+    if move in movi:
+        return move
+    elif move[0] in {"h", "help"}:
+        print(hlp)
+        return interactive_choice(movi, bord)
+    else:
+        print('please enter a vlid move.  If you need help just enter "help".')
+        return interactive_choice(movi, bord)
+
+
 # priority in function names from right to left
 
 if __name__ == "__main__":
@@ -250,12 +270,14 @@ if __name__ == "__main__":
         parser.add_argument('choice', metavar="C", help="Algorithm to decide the moves", default="random")
         parser.add_argument("-d", help="turn on debug mode", action="store_true", )
         args = parser.parse_args()
-        choices = {"max_center", "random", "first_max", "rand_max", "emp_cent", "center_max"}
+        choices = {"max_center", "random", "first_max", "rand_max", "emp_cent", "center_max", "interactive"}
 
         if args.choice not in choices:
             print("please enter a valid decision algorithm:\n\t", str(choices)[1:-1])
             exit(0)
         game(args.choice, args.d)
+
+
     main()
 
 """
