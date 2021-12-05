@@ -161,9 +161,8 @@ def move(bord: Board, mv: dict, empid=' 4'):
 
 def game(choice_fun="random", dbg=False):
     openning = [Peon('g', i) for i in range(4)]
-    emp = (Peon(' ', 4))
-    openning.append(emp)
-    openning.extend([Peon('b', i + 5) for i in range(4)])
+    openning.extend([(Peon(' ', i + 4)) for i in range(2)])
+    openning.extend([Peon('b', i + 6) for i in range(4)])
     cntnt = Content(set(openning))
     openids = [p.id for p in openning]
     bord = Board(openids)
