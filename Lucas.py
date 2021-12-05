@@ -21,14 +21,11 @@ class Peon:
 
     def dir(self):
         """returns direction as positive or negative unit (int)"""
-        dirdic = {'g': 1, ' ': 1, 'b': -1}
+        dirdic = {'g': 1, ' ': 0, 'b': -1}
         try:
             return dirdic[self.color]
         except KeyError:
             return None
-
-    # minor hack: giving the blank peon non-zero direction. since there's only one blank peon
-    # we won't need to make special case for it, and it won't find another blank peon in that direction.
 
     def place(self):
         return self.bord.place(self.id)
@@ -48,6 +45,16 @@ class Peon:
         """returns boolean value of is it possible for a peon jump over one peon"""
         jump_dest = self.jump_dest()
         return jump_dest is not None and jump_dest.color == ' '
+
+
+class EmptySpace(Peon):
+    def __init__(self, ordinal):
+        super().__init__(' ', ordinal)
+
+    def is_step(self) -> bool:
+        return False
+
+    is_jump = is_step
 
 
 class Content:
@@ -161,7 +168,7 @@ def move(bord: Board, mv: dict, empid=' 4'):
 
 def game(choice_fun="random", dbg=False):
     openning = [Peon('g', i) for i in range(4)]
-    openning.extend([(Peon(' ', i + 4)) for i in range(2)])
+    openning.extend([(EmptySpace(i + 4)) for i in range(2)])
     openning.extend([Peon('b', i + 6) for i in range(4)])
     cntnt = Content(set(openning))
     openids = [p.id for p in openning]
