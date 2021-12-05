@@ -173,7 +173,7 @@ def game(choice_fun="random", dbg=False):
     while cont:
         movi = list_moves(bord, cntnt)
         try:
-            ch = eval(f"{choice_fun}_choice(movi, bord)")
+            ch = eval(f"{choice_fun}_choice(movi, bord, cntnt)")
             bord.order = move(bord, ch["peon"], ch["kind"])
             print(bord)
             if dbg: print(score(bord.order))
@@ -181,11 +181,11 @@ def game(choice_fun="random", dbg=False):
             cont = False
 
 
-def random_choice(movi, _):
+def random_choice(movi, _, __):
     return choice(movi)
 
 
-def first_max_choice(movi, bord):
+def first_max_choice(movi, bord, _):
     if not movi:
         raise IndexError
     scori = movi_score(movi, bord, score)
@@ -194,7 +194,7 @@ def first_max_choice(movi, bord):
     return back
 
 
-def rand_max_choice(movi, bord):
+def rand_max_choice(movi, bord, _):
     if not movi:
         raise IndexError
     scori = movi_score(movi, bord, score)
@@ -204,7 +204,7 @@ def rand_max_choice(movi, bord):
     return back
 
 
-def emp_center_choice(movi, bord):
+def emp_center_choice(movi, bord, _):
     if not movi:
         raise IndexError
     scori = movi_score(movi, bord, emp_center_scr)
@@ -214,7 +214,7 @@ def emp_center_choice(movi, bord):
     return back
 
 
-def center_max_choice(movi, bord):
+def center_max_choice(movi, bord, _):
     if not movi:
         raise IndexError
     maxi = movi_score(movi, bord, score)
@@ -227,7 +227,7 @@ def center_max_choice(movi, bord):
     return back
 
 
-def max_center_choice(movi, bord):
+def max_center_choice(movi, bord, _):
     if not movi:
         raise IndexError
     maxi = movi_score(movi, bord, score)
@@ -240,7 +240,7 @@ def max_center_choice(movi, bord):
     return back
 
 
-def interactive_choice(movi, bord):
+def interactive_choice(movi, bord, cntnt):
     if not movi:
         raise IndexError
     hlp = """A valid move is the name of a paon, followed by "step" for a move of 1 or "jump" for a move of 2"""
@@ -248,16 +248,18 @@ def interactive_choice(movi, bord):
     move = move.split()
     if len(move) >= 2:
         move = {"peon": move[0], "kind": move[1]}
+        move["peon"] = cntnt.peon_find(move["peon"])
         if move["kind"] in {'j', 's'}:
             move["kind"] = {'j': "jump", "s": "step"}[move["kind"]]
+    # if move in [{"peon": mv["peon"].id, "kind":mv["kind"]} for mv in movi]:
     if move in movi:
         return move
     elif move[0] in {"h", "help"}:
         print(hlp)
-        return interactive_choice(movi, bord)
+        return interactive_choice(movi, bord, cntnt)
     else:
         print('please enter a vlid move.  If you need help just enter "help".')
-        return interactive_choice(movi, bord)
+        return interactive_choice(movi, bord, cntnt)
 
 
 # priority in function names from right to left
