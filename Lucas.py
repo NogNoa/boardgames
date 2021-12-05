@@ -127,7 +127,7 @@ def movi_score(movi: list, bord: Board, cntnt: Content, scrfunc):
     """take a list of moves without a score and adds a score"""
     scori = []
     for mv in movi:
-        consequnce = move(bord, cntnt, mv)
+        consequnce = move(bord, mv)
         scr = scrfunc(consequnce)
         scori.append(scr)
     return scori
@@ -148,7 +148,7 @@ def distance(kind: str):
         raise ValueError
 
 
-def move(bord: Board, cntnt: Content, mv: dict, empid=' 4'):
+def move(bord: Board, mv: dict, empid=' 4'):
     """returns a new board object repesenting the state after the move is taken"""
     # deepcopy is used to let us look ahead at future boards without changing the current one
     pid, kind = mv["peon"], mv["kind"]
@@ -176,7 +176,7 @@ def game(choice_fun="random", dbg=False):
         movi = list_moves(bord, cntnt)
         try:
             ch = eval(f"{choice_fun}_choice(movi, bord, cntnt)")
-            bord.order = move(bord, cntnt, ch)
+            bord.order = move(bord, ch)
             print(bord)
             if dbg: print(score(bord.order))
         except IndexError:
@@ -186,8 +186,7 @@ def game(choice_fun="random", dbg=False):
 def random_choice(movi, _, __):
     return choice(movi)
 
-
-def first_max_choice(movi, bord, cntnt):
+def first_max_choice(movi, bord, _):
     if not movi:
         raise IndexError
     scori = movi_score(movi, bord, cntnt, score)
@@ -196,7 +195,7 @@ def first_max_choice(movi, bord, cntnt):
     return back
 
 
-def rand_max_choice(movi, bord, cntnt):
+def rand_max_choice(movi, bord, _):
     if not movi:
         raise IndexError
     scori = movi_score(movi, bord, cntnt, score)
@@ -205,8 +204,7 @@ def rand_max_choice(movi, bord, cntnt):
     back = movi[choice(besti)]
     return back
 
-
-def emp_center_choice(movi, bord, cntnt):
+def emp_center_choice(movi, bord, _):
     if not movi:
         raise IndexError
     scori = movi_score(movi, bord, cntnt, emp_center_scr)
@@ -216,7 +214,7 @@ def emp_center_choice(movi, bord, cntnt):
     return back
 
 
-def center_max_choice(movi, bord, cntnt):
+def center_max_choice(movi, bord, _):
     if not movi:
         raise IndexError
     maxi = movi_score(movi, bord, cntnt, score)
@@ -229,7 +227,7 @@ def center_max_choice(movi, bord, cntnt):
     return back
 
 
-def max_center_choice(movi, bord, cntnt):
+def max_center_choice(movi, bord, _):
     if not movi:
         raise IndexError
     maxi = movi_score(movi, bord, cntnt, score)
@@ -242,7 +240,7 @@ def max_center_choice(movi, bord, cntnt):
     return back
 
 
-def interactive_choice(movi, bord, _=None):
+def interactive_choice(movi, bord, cntnt):
     if not movi:
         raise IndexError
     hlp = """A valid move is the name of a paon, followed by space and "step" for a move of 1 or "jump" for a move of 
@@ -251,16 +249,18 @@ def interactive_choice(movi, bord, _=None):
     move = move.split()
     if len(move) >= 2:
         move = {"peon": move[0], "kind": move[1]}
+        move["peon"] = cntnt.peon_find(move["peon"])
         if move["kind"] in {'j', 's'}:
             move["kind"] = {'j': "jump", "s": "step"}[move["kind"]]
+    # if move in [{"peon": mv["peon"].id, "kind":mv["kind"]} for mv in movi]:
     if move in movi:
         return move
     elif move[0] in {"h", "help"}:
         print(hlp)
-        return interactive_choice(movi, bord)
+        return interactive_choice(movi, bord, cntnt)
     else:
-        print('please enter a valid move.  If you need help just enter "help".')
-        return interactive_choice(movi, bord)
+        print('please enter a vlid move.  If you need help just enter "help".')
+        return interactive_choice(movi, bord, cntnt)
 
 
 # priority in function names from right to left
