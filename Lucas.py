@@ -248,17 +248,25 @@ def interactive_choice(movi, bord, cntnt):
     2 """
     move = input("Move?\n > ").lower()
     move = move.split()
+    mv = {}
     if len(move) >= 2:
-        move = {"peon": move[0], "kind": move[1]}
-        move["peon"] = cntnt.peon_find(move["peon"])
-        if move["kind"] in {'j', 's'}:
-            move["kind"] = {'j': "jump", "s": "step"}[move["kind"]]
-    # if move in [{"peon": mv["peon"].id, "kind":mv["kind"]} for mv in movi]:
-    if move in movi:
-        return move
+        mv["peon"] = cntnt.peon_find(move[0])
+        if move[1] in {'j', 's'}:
+            mv["kind"] = {'j': "jump", "s": "step"}[move[1]]
+        else:
+            mv["kind"] = move[1]
+    if mv in movi:
+        return mv
     elif move[0] in {"h", "help"}:
         print(hlp)
         return interactive_choice(movi, bord, cntnt)
+        """
+    elif (mv != {} and
+          mv["peon"][0] in {'g', 'b'} and
+          int(mv["peon"]) in range(9) and
+          mv["kind"] in {"jump", "step"}):
+        print("you can make that move")
+        """
     else:
         print('please enter a vlid move.  If you need help just enter "help".')
         return interactive_choice(movi, bord, cntnt)
