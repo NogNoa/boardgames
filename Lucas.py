@@ -6,7 +6,6 @@ class Peon:
     def __init__(self, color, ordinal):
         self.color = color
         self.id = color + str(ordinal)
-        self.dir = self.dir()
         self.bord = self.peon_find = None
 
     def set_contacts(self, bord: object, pfind):
@@ -19,6 +18,7 @@ class Peon:
     def __repr__(self):
         return self.id
 
+    @property
     def dir(self):
         """returns direction as positive or negative unit (int)"""
         dirdic = {'g': 1, ' ': 0, 'b': -1}
@@ -51,7 +51,7 @@ class Content:
     def __init__(self, peoni: set):
         self.val = {p.id: p for p in peoni}
 
-    def peon_find(self, pid: str):
+    def __call__(self, pid: str):
         try:
             return self.val[pid]
         except KeyError:
@@ -95,13 +95,13 @@ def score(order):
     return back
 
 
-def list_moves(bord: Board, cntnt: Content):
+def list_moves(bord: Board, peon_find: Content):
     """returns list of possible moves. each move formated as
     a pair of a peon object, a string for kind of move,
     and an int for the score of the move"""
     movi = []
     for p in bord:
-        p = cntnt.peon_find(p)
+        p = peon_find(p)
         if p.color == ' ':
             continue
         for k in {"step", "jump"}:
@@ -150,7 +150,7 @@ def game(choice_fun="random", dbg=False):
     openids = [p.id for p in openning]
     bord = Board(openids)
     for p in openning:
-        p.set_contacts(bord, cntnt.peon_find)
+        p.set_contacts(bord, cntnt)
     print(bord)
     cont = True
     while cont:
@@ -223,7 +223,7 @@ def max_center_choice(movi, bord, _):
     return back
 
 
-def interactive_choice(movi, bord, cntnt):
+def interactive_choice(movi, bord, peon_find: Content):
     if not movi:
         raise IndexError
     hlp = """A valid move is the name of a paon, followed by space and "step" for a move of 1 or "jump" for a move of 
@@ -233,7 +233,7 @@ def interactive_choice(movi, bord, cntnt):
 
     if len(move) >= 2:
         move = {"peon": move[0], "kind": move[1]}
-        move["peon"] = cntnt.peon_find(move[0])
+        move["peon"] = peon_find(move[0])
         if move["kind"] in {'j', 's'}:
             move["kind"] = {'j': "jump", "s": "step"}[move["kind"]]
         else:
@@ -242,10 +242,10 @@ def interactive_choice(movi, bord, cntnt):
         return move
     elif move[0] in {"h", "help"}:
         print(hlp)
-        return interactive_choice(movi, bord, cntnt)
+        return interactive_choice(movi, bord, peon_find)
     else:
         print('please enter a vlid move.  If you need help just enter "help".')
-        return interactive_choice(movi, bord, cntnt)
+        return interactive_choice(movi, bord, peon_find)
 
 
 # priority in function names from right to left
