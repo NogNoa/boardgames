@@ -106,7 +106,7 @@ def list_moves(bord: Board, cntnt: Content):
             continue
         for k in {"step", "jump"}:
             if p.is_move(k):
-                movi.append({'peon': p.id, 'kind': k})
+                movi.append({'peon': p, 'kind': k})
     return movi
 
 
@@ -136,10 +136,9 @@ def move(bord: Board, mv: dict):
     p, kind = mv["peon"], mv["kind"]
     n_bord = deepcopy(bord.order)
     place = bord.order.index(p.id)
-    dest = p.dest(kind)
-    empid = bord[dest]
-    n_bord[dest] = p.id
-    n_bord[place] = empid
+    emp = p.dest(kind)
+    n_bord[emp.place()] = p.id
+    n_bord[place] = emp.id
     return n_bord
 
 
@@ -270,7 +269,6 @@ if __name__ == "__main__":
 
     main()
 
-# todo: integrate move into peon? pass content into move so in can retrieve peon?
-#   On one hand I want to make peon less exposed and on the other I want to make it responsible.
-#   Somewhat contradicting.
-#   otherwise I need to pass content to interactive choice
+# todo: update emp_scr
+#   move Board.dest finally inside peon
+#   either incorporate content into board or make it just be a plain list.
