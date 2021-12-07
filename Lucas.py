@@ -3,12 +3,12 @@ import random as rnd
 
 
 class Peon:
-    def __init__(self, color, ordinal):
+    def __init__(self, color: str, ordinal: int):
         self.color = color
         self.id = color + str(ordinal)
         self.bord = self.peon_find = None
 
-    def set_contacts(self, bord: object, pfind):
+    def set_contacts(self, bord, pfind):
         self.bord = bord
         self.peon_find = pfind
 
@@ -27,7 +27,8 @@ class Peon:
         except KeyError:
             return None
 
-    def place(self):
+    @property
+    def place(self) -> int:
         return self.bord.place(self.id)
 
     def dest(self, kind: str):
@@ -40,7 +41,7 @@ class Peon:
 
 
 class EmptySpace(Peon):
-    def __init__(self, ordinal):
+    def __init__(self, ordinal: int):
         super().__init__(' ', ordinal)
 
     def is_move(self, _) -> bool:
@@ -59,21 +60,21 @@ class Content:
 
 
 class Board:
-    def __init__(self, order: list):
+    def __init__(self, order: list[str]):
         self.order = order
 
-    def __getitem__(self, i):
+    def __getitem__(self, i: int) -> str:
         return self.order[i]
 
     def __str__(self):
         """returns human readable list of unique peons"""
         return str(self.order)
 
-    def place(self, p_id: str):
+    def place(self, p_id: str) -> int:
         """retruns the index (int) of a peon on the bord from grey side to black side"""
         return self.order.index(p_id)
 
-    def dest(self, p: Peon, kind):
+    def dest(self, p: Peon, kind: str):
         distdic = {"jump": 2, "step": 1}
         try:
             dest_id = self.order[self.place(p.id) + distdic[kind]]
@@ -83,7 +84,7 @@ class Board:
             return None
 
 
-def score(order):
+def score(order: list[str]) -> int:
     back = 0
     for i, p in enumerate(order):
         point = i
@@ -95,7 +96,7 @@ def score(order):
     return back
 
 
-def list_moves(bord: Board, peon_find: Content):
+def list_moves(bord: Board, peon_find: Content) -> list[dict]:
     """returns list of possible moves. each move formated as
     a pair of a peon object, a string for kind of move,
     and an int for the score of the move"""
@@ -114,7 +115,7 @@ def list_moves(bord: Board, peon_find: Content):
 # it might make prior blank direction hack unnecessary.
 
 
-def movi_score(movi: list, bord: Board, scrfunc):
+def movi_score(movi: list, bord: Board, scrfunc) -> list[int]:
     """take a list of moves without a score and adds a score"""
     scori = []
     for mv in movi:
@@ -124,20 +125,20 @@ def movi_score(movi: list, bord: Board, scrfunc):
     return scori
 
 
-def emp_center_scr(consq, empid=" 4"):
+def emp_center_scr(consq: list[str], empid=" 4") -> int:
     emp_pl = consq.index(empid)
     scr = 4 - abs(4 - emp_pl)
     return scr
 
 
-def move(bord: Board, mv: dict):
+def move(bord: Board, mv: dict) -> list[str]:
     """returns a new board object repesenting the state after the move is taken"""
     # deepcopy is used to let us look ahead at future boards without changing the current one
     p, kind = mv["peon"], mv["kind"]
     n_bord = deepcopy(bord.order)
     place = bord.order.index(p.id)
     emp = p.dest(kind)
-    n_bord[emp.place()] = p.id
+    n_bord[emp.place] = p.id
     n_bord[place] = emp.id
     return n_bord
 
@@ -164,11 +165,11 @@ def game(choice_fun="random", dbg=False):
             cont = False
 
 
-def random_choice(movi, _, __):
+def random_choice(movi: list[dict], _, __) -> dict:
     return rnd.choice(movi)
 
 
-def first_max_choice(movi, bord, _):
+def first_max_choice(movi: list[dict], bord: Board, _) -> dict:
     if not movi:
         raise IndexError
     scori = movi_score(movi, bord, score)
@@ -177,7 +178,7 @@ def first_max_choice(movi, bord, _):
     return back
 
 
-def rand_max_choice(movi, bord, _):
+def rand_max_choice(movi: list[dict], bord: Board, _) -> dict:
     if not movi:
         raise IndexError
     scori = movi_score(movi, bord, score)
@@ -187,7 +188,7 @@ def rand_max_choice(movi, bord, _):
     return back
 
 
-def emp_center_choice(movi, bord, _):
+def emp_center_choice(movi: list[dict], bord: Board, _) -> dict:
     if not movi:
         raise IndexError
     scori = movi_score(movi, bord, emp_center_scr)
@@ -197,7 +198,7 @@ def emp_center_choice(movi, bord, _):
     return back
 
 
-def center_max_choice(movi, bord, _):
+def center_max_choice(movi: list[dict], bord: Board, _) -> dict:
     if not movi:
         raise IndexError
     maxi = movi_score(movi, bord, score)
@@ -210,7 +211,7 @@ def center_max_choice(movi, bord, _):
     return back
 
 
-def max_center_choice(movi, bord, _):
+def max_center_choice(movi: list[dict], bord: Board, _) -> dict:
     if not movi:
         raise IndexError
     maxi = movi_score(movi, bord, score)
@@ -223,7 +224,7 @@ def max_center_choice(movi, bord, _):
     return back
 
 
-def interactive_choice(movi, bord, peon_find: Content):
+def interactive_choice(movi: list[dict], bord: Board, peon_find: Content) -> dict:
     if not movi:
         raise IndexError
     hlp = """A valid move is the name of a paon, followed by space and "step" for a move of 1 or "jump" for a move of 
