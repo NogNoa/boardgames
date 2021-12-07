@@ -1,5 +1,5 @@
 from copy import deepcopy
-from random import choice
+import random as rnd
 
 
 class Peon:
@@ -30,31 +30,22 @@ class Peon:
     def place(self):
         return self.bord.place(self.id)
 
-    def step_dest(self):
-        return self.peon_find(self.bord.step_dest(self))
+    def dest(self, kind: str):
+        destdir = {"step": self.bord.step_dest, "jump": self.bord.jump_dest}
+        return self.peon_find(destdir[kind](self))
 
-    def jump_dest(self):
-        return self.peon_find(self.bord.jump_dest(self))
-
-    def is_step(self) -> bool:
-        """returns boolean value of is it possible for a peon to move one space"""
-        step_dest = self.step_dest()
-        return step_dest is not None and step_dest.color == ' '
-
-    def is_jump(self) -> bool:
-        """returns boolean value of is it possible for a peon jump over one peon"""
-        jump_dest = self.jump_dest()
-        return jump_dest is not None and jump_dest.color == ' '
+    def is_move(self, kind: str) -> bool:
+        """returns boolean value of is it possible for a peon to move one space for step or two for jump"""
+        dest = self.dest(kind)
+        return dest is not None and dest.color == ' '
 
 
 class EmptySpace(Peon):
     def __init__(self, ordinal):
         super().__init__(' ', ordinal)
 
-    def is_step(self) -> bool:
+    def is_move(self, _) -> bool:
         return False
-
-    is_jump = is_step
 
 
 class Content:
@@ -119,10 +110,9 @@ def list_moves(bord: Board, cntnt: Content):
         p = cntnt.peon_find(p)
         if p.color == ' ':
             continue
-        if p.is_step():
-            movi.append({'peon': p.id, 'kind': 'step'})
-        if p.is_jump():
-            movi.append({'peon': p.id, 'kind': 'jump'})
+        for k in {"step", "jump"}:
+            if p.is_move(k):
+                movi.append({'peon': p.id, 'kind': k})
     return movi
 
 
@@ -155,13 +145,15 @@ def distance(kind: str):
         raise ValueError
 
 
-def move(bord: Board, mv: dict, empid=' 4'):
+def move(bord: Board, mv: dict):
     """returns a new board object repesenting the state after the move is taken"""
     # deepcopy is used to let us look ahead at future boards without changing the current one
     p, kind = mv["peon"], mv["kind"]
     n_bord = deepcopy(bord.order)
     place = bord.order.index(p.id)
-    n_bord[place + distance(kind) * p.dir] = p.id
+    dest = p.dest(kind)
+    empid = bord[dest]
+    n_bord[dest] = p.id
     n_bord[place] = empid
     return n_bord
 
@@ -189,7 +181,7 @@ def game(choice_fun="random", dbg=False):
 
 
 def random_choice(movi, _, __):
-    return choice(movi)
+    return rnd.choice(movi)
 
 
 def first_max_choice(movi, bord, _):
@@ -207,7 +199,7 @@ def rand_max_choice(movi, bord, _):
     scori = movi_score(movi, bord, score)
     best = max(scori)
     besti = [pl for pl, scr in enumerate(scori) if scr == best]
-    back = movi[choice(besti)]
+    back = movi[rnd.choice(besti)]
     return back
 
 
@@ -217,7 +209,7 @@ def emp_center_choice(movi, bord, _):
     scori = movi_score(movi, bord, emp_center_scr)
     best = max(scori)
     besti = [pl for pl, scr in enumerate(scori) if scr == best]
-    back = movi[choice(besti)]
+    back = movi[rnd.choice(besti)]
     return back
 
 
@@ -230,7 +222,7 @@ def center_max_choice(movi, bord, _):
     besti = [scr if maxi[pl] == best_score else 0 for pl, scr in enumerate(centri)]
     best_center = max(besti)
     besti = [pl for pl, scr in enumerate(besti) if scr == best_center]
-    back = movi[choice(besti)]
+    back = movi[rnd.choice(besti)]
     return back
 
 
@@ -243,7 +235,7 @@ def max_center_choice(movi, bord, _):
     besti = [scr if centri[pl] == best_center else 0 for pl, scr in enumerate(maxi)]
     best_score = max(besti)
     besti = [pl for pl, scr in enumerate(besti) if scr == best_score]
-    back = movi[choice(besti)]
+    back = movi[rnd.choice(besti)]
     return back
 
 
@@ -293,11 +285,6 @@ if __name__ == "__main__":
 
     main()
 
-"""
-print(expose_bord(bord))
-joe = [i.is_step() for i in bord]
-print(joe)
-"""
 
 # todo: integrate move into peon? pass content into move so in can retrieve peon?
 #   On one hand I want to make peon less exposed and on the other I want to make it responsible.
