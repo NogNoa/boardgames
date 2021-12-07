@@ -31,8 +31,7 @@ class Peon:
         return self.bord.place(self.id)
 
     def dest(self, kind: str):
-        destdir = {"step": self.bord.step_dest, "jump": self.bord.jump_dest}
-        return self.peon_find(destdir[kind](self))
+        return self.peon_find(self.bord.dest(self, kind))
 
     def is_move(self, kind: str) -> bool:
         """returns boolean value of is it possible for a peon to move one space for step or two for jump"""
@@ -74,16 +73,11 @@ class Board:
         """retruns the index (int) of a peon on the bord from grey side to black side"""
         return self.order.index(p_id)
 
-    def step_dest(self, p: Peon):
+    def dest(self, p: Peon, kind):
+        distdic = {"jump": 2, "step": 1}
         try:
-            dest_id = self.order[self.place(p.id) + p.dir]  # a place one step to the left or to the right
-            return dest_id
-        except IndexError:
-            return None
-
-    def jump_dest(self, p: Peon):
-        try:
-            dest_id = self.order[self.place(p.id) + p.dir * 2]  # a place two steps to the left or to the right
+            dest_id = self.order[self.place(p.id) + distdic[kind]]
+            # a place one or two steps to the left or to the right
             return dest_id
         except IndexError:
             return None
@@ -134,15 +128,6 @@ def emp_center_scr(consq, empid=" 4"):
     emp_pl = consq.index(empid)
     scr = 4 - abs(4 - emp_pl)
     return scr
-
-
-def distance(kind: str):
-    """returns int value for each kind of move"""
-    distdic = {"jump": 2, "step": 1}
-    try:
-        return distdic[kind]
-    except KeyError:
-        raise ValueError
 
 
 def move(bord: Board, mv: dict):
@@ -284,7 +269,6 @@ if __name__ == "__main__":
 
 
     main()
-
 
 # todo: integrate move into peon? pass content into move so in can retrieve peon?
 #   On one hand I want to make peon less exposed and on the other I want to make it responsible.
