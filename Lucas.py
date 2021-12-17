@@ -77,7 +77,7 @@ class Board:
     def dest(self, p: Peon, kind: str):
         distdic = {"jump": 2, "step": 1}
         try:
-            dest_id = self.order[self.place(p.id) + distdic[kind]]
+            dest_id = self.order[self.place(p.id) + distdic[kind] * p.dir]
             # a place one or two steps to the left or to the right
             return dest_id
         except IndexError:
@@ -237,7 +237,7 @@ def interactive_choice(movi: list[dict], bord: Board, peon_find: Content) -> dic
 
     if len(move) >= 2:
         move = {"peon": move[0], "kind": move[1]}
-        move["peon"] = peon_find(move[0])
+        move["peon"] = peon_find(move["peon"])
         if move["kind"] in {'j', 's'}:
             move["kind"] = {'j': "jump", "s": "step"}[move["kind"]]
         else:
@@ -247,6 +247,9 @@ def interactive_choice(movi: list[dict], bord: Board, peon_find: Content) -> dic
     elif move[0] in {"h", "help"}:
         print(hlp)
         return interactive_choice(movi, bord, peon_find)
+    elif move[0] in {'q', "quit", "exit"}:
+        print("Be seeing you.")
+        raise IndexError
     else:
         print('please enter a vlid move.  If you need help just enter "help".')
         return interactive_choice(movi, bord, peon_find)
