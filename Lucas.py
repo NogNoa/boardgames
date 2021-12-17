@@ -127,9 +127,10 @@ def movi_score(movi: list, bord: Board, scrfunc) -> list[int]:
 
 def emp_center_scr(consq: list[str]) -> int:
     scr = 0
+    cntr = len(consq)/2
     for i, p in enumerate(consq):
         if p[0] == ' ':
-            scr += 4 - abs(4 - i)
+            scr += cntr - abs(cntr - i)
     return scr
 
 
@@ -272,13 +273,6 @@ if __name__ == "__main__":
 
     main()
 
-# todo: update emp_scr
-#   move Board.dest finally inside peon
+# todo: move Board.dest finally inside peon
 #   either incorporate content into board or make it just be a plain list.
 
-"""
-sum(4 - abs(4-i),m) =
-4m - sum(abs(4-i),m) =
-4m - sum(abs(4-[0,8]),m) =
-4m - [0,4]m
-"""
