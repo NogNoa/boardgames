@@ -75,9 +75,9 @@ class Board:
         return self.order.index(p_id)
 
     def dest(self, p: Peon, kind: str):
-        distdic = {"jump": 2, "step": 1}
+        dist = {"jump": 2, "step": 1}[kind]
         try:
-            dest_id = self.order[self.place(p.id) + distdic[kind] * p.dir]
+            dest_id = self.order[self.place(p.id) + dist * p.dir]
             # a place one or two steps to the left or to the right
             return dest_id
         except IndexError:
@@ -127,11 +127,17 @@ def movi_score(movi: list, bord: Board, scrfunc) -> list[int]:
 
 def emp_center_scr(consq: list[str]) -> int:
     scr = 0
-    cntr = len(consq)/2
+    cntr = len(consq) / 2
     for i, p in enumerate(consq):
         if p[0] == ' ':
             scr += cntr - abs(cntr - i)
     return scr
+
+
+"""def movi_count(consq: list[str], pf: Content) -> int:
+    movi = list_moves(Board(consq), pf)
+    return len(movi)
+"""
 
 
 def move(bord: Board, mv: dict) -> list[str]:
@@ -227,6 +233,11 @@ def max_center_choice(movi: list[dict], bord: Board, _) -> dict:
     return back
 
 
+"""def keep_options_choice(movi: list[dict], bord: Board, pf: Content) -> dict:
+    scori = movi_score(movi, bord, movi_count)
+"""
+
+
 def interactive_choice(movi: list[dict], bord: Board, peon_find: Content) -> dict:
     if not movi:
         raise IndexError
@@ -278,4 +289,3 @@ if __name__ == "__main__":
 
 # todo: move Board.dest finally inside peon
 #   either incorporate content into board or make it just be a plain list.
-
