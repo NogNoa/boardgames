@@ -240,22 +240,27 @@ def interactive_choice(movi: list[dict], bord: Board, peon_find: Content) -> dic
         raise IndexError
     hlp = """A valid move is the name of a paon, followed by space and "step" for a move of 1 or "jump" for a move of 
     2 """
-    move = input("Move?\n > ").lower()
-    move = move.split()
+    call = input("Move?\n > ").lower()
+    call = call.split()
 
-    if len(move) >= 2:
-        move = {"peon": move[0], "kind": move[1]}
+    if len(call) >= 2:
+        move = {"peon": call[0], "kind": call[1]}
         move["peon"] = peon_find(move["peon"])
         if move["kind"] in {'j', 's'}:
             move["kind"] = {'j': "jump", "s": "step"}[move["kind"]]
         else:
-            move["kind"] = move[1]
+            move["kind"] = call[1]
+    else:
+        move = None
     if move in movi:
         return move
-    elif move[0] in {"h", "help"}:
+    elif call[0] in {"h", "help"}:
         print(hlp)
         return interactive_choice(movi, bord, peon_find)
-    elif move[0] in {'q', "quit", "exit"}:
+    elif call[0] in {"movi"}:
+        print(movi)  # for debuging
+        return interactive_choice(movi, bord, peon_find)
+    elif call[0] in {'q', "quit", "exit"}:
         print("Be seeing you.")
         raise IndexError
     else:
@@ -285,3 +290,4 @@ if __name__ == "__main__":
     main()
 
 # todo: either incorporate content into board or make it just be a plain list.
+#  the interactive function is conditioned wrong. rethink.
