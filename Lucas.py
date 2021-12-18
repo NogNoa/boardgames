@@ -32,7 +32,13 @@ class Peon:
         return self.bord.place(self.id)
 
     def dest(self, kind: str):
-        return self.peon_find(self.bord.dest(self, kind))
+        dist = {"jump": 2, "step": 1}[kind]
+        try:
+            dest_id = self.bord[self.place + dist * self.dir]
+            # a place one or two steps to the left or to the right
+            return self.peon_find(dest_id)
+        except IndexError:
+            return None
 
     def is_move(self, kind: str) -> bool:
         """returns boolean value of is it possible for a peon to move one space for step or two for jump"""
@@ -73,15 +79,6 @@ class Board:
     def place(self, p_id: str) -> int:
         """retruns the index (int) of a peon on the bord from grey side to black side"""
         return self.order.index(p_id)
-
-    def dest(self, p: Peon, kind: str):
-        dist = {"jump": 2, "step": 1}[kind]
-        try:
-            dest_id = self.order[self.place(p.id) + dist * p.dir]
-            # a place one or two steps to the left or to the right
-            return dest_id
-        except IndexError:
-            return None
 
 
 def score(order: list[str]) -> int:
@@ -287,5 +284,4 @@ if __name__ == "__main__":
 
     main()
 
-# todo: move Board.dest finally inside peon
-#   either incorporate content into board or make it just be a plain list.
+# todo: either incorporate content into board or make it just be a plain list.
