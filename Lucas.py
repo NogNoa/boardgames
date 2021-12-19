@@ -168,7 +168,7 @@ def game(choice_fun="random", dbg=False):
             print(bord)
             if dbg: print(score(bord.order))
         except IndexError:
-            if bord.order == ['b6', 'b7', 'b8', 'b9', ' 4', ' 5', 'g0', 'g1', 'g2', 'g3']:
+            if score(bord.order) == 60:
                 print("You've done did it Chemp!")
             cont = False
 
