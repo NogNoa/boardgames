@@ -6,11 +6,10 @@ class Peon:
     def __init__(self, color: str, ordinal: int):
         self.color = color
         self.id = color + str(ordinal)
-        self.bord = self.peon_find = None
+        self.bord = None
 
-    def set_contacts(self, bord, pfind):
+    def set_contacts(self, bord):
         self.bord = bord
-        self.peon_find = pfind
 
     def __str__(self):
         return self.id
@@ -36,7 +35,7 @@ class Peon:
         try:
             dest_id = self.bord[self.place + dist * self.dir]
             # a place one or two steps to the left or to the right
-            return self.peon_find(dest_id)
+            return self.bord.peon_find(dest_id)
         except IndexError:
             return None
 
@@ -54,23 +53,16 @@ class EmptySpace(Peon):
         return False
 
 
-class Content:
-    def __init__(self, peoni: set):
-        self.val = {p.id: p for p in peoni}
-
-    def __call__(self, pid: str):
-        try:
-            return self.val[pid]
-        except KeyError:
-            return None
-
-
 class Board:
-    def __init__(self, order: list[str]):
+    def __init__(self, order: list[str], peoni: set):
         self.order = order
+        self.cntnt = {p.id: p for p in peoni}
 
     def __getitem__(self, i: int) -> str:
         return self.order[i]
+
+    def __len__(self):
+        return len(self.order)
 
     def __str__(self):
         """returns human readable list of unique peons"""
@@ -80,8 +72,11 @@ class Board:
         """retruns the index (int) of a peon on the bord from grey side to black side"""
         return self.order.index(p_id)
 
-    def __len__(self):
-        return len(self.order)
+    def peon_find(self, pid):
+        try:
+            return self.cntnt[pid]
+        except KeyError:
+            return None
 
 
 def score(order: list[str]) -> int:
@@ -96,13 +91,13 @@ def score(order: list[str]) -> int:
     return back
 
 
-def list_moves(bord: Board, peon_find: Content) -> list[dict]:
+def list_moves(bord: Board) -> list[dict]:
     """returns list of possible moves. each move formated as
     a pair of a peon object, a string for kind of move,
     and an int for the score of the move"""
     movi = []
     for p in bord:
-        p = peon_find(p)
+        p = bord.peon_find(p)
         if p.color == ' ':
             continue
         for k in {"step", "jump"}:
@@ -160,17 +155,16 @@ def game(choice_fun="random", nmr_side=4, nmr_emp=2, dbg=False):
     openning = [Peon('g', i) for i in range(nmr_side)]
     openning.extend([(EmptySpace(i + nmr_side)) for i in range(nmr_emp)])
     openning.extend([Peon('b', i + nmr_side + nmr_emp) for i in range(nmr_side)])
-    cntnt = Content(set(openning))
     openids = [p.id for p in openning]
-    bord = Board(openids)
+    bord = Board(openids, set(openning))
     for p in openning:
-        p.set_contacts(bord, cntnt)
+        p.set_contacts(bord)
     print(bord)
     cont = True
     while cont:
-        movi = list_moves(bord, cntnt)
+        movi = list_moves(bord)
         try:
-            ch = eval(f"{choice_fun}_choice(movi, bord, cntnt)")
+            ch = eval(f"{choice_fun}_choice(movi, bord)")
             bord.order = move(bord, ch)
             print(bord)
             if dbg: print(score(bord.order))
@@ -244,7 +238,7 @@ def max_center_choice(movi: list[dict], bord: Board, _) -> dict:
 """
 
 
-def interactive_choice(movi: list[dict], bord: Board, peon_find: Content) -> dict:
+def interactive_choice(movi: list[dict], bord: Board) -> dict:
     if not movi:
         raise IndexError
     hlp = """A valid move is the name of a paon, followed by 's' or "step" for a move of 1 space 
@@ -255,15 +249,15 @@ or followed by 'j' or "jump" for a move of 2 spaces. Type 'q', "quit" or "exit" 
     if len(call) >= 1:
         if call[0] in {"h", "help"}:
             print(hlp)
-            return interactive_choice(movi, bord, peon_find)
+            return interactive_choice(movi, bord)
         elif call[0] == "movi":
-            print(movi)  # for debuging
-            return interactive_choice(movi, bord, peon_find)
+            print(movi)  # for debugging
+            return interactive_choice(movi, bord)
         elif call[0] in {'q', "quit", "exit"}:
             print("Be seeing you.")
             raise IndexError
         else:
-            move = {"peon": peon_find(call[0])}
+            move = {"peon": bord.peon_find(call[0])}
     else:
         move = None
     if len(call) >= 2:
@@ -276,7 +270,7 @@ or followed by 'j' or "jump" for a move of 2 spaces. Type 'q', "quit" or "exit" 
         return move
     else:
         print('please enter a vlid move.  If you need help just enter \'h\' or "help".')
-        return interactive_choice(movi, bord, peon_find)
+        return interactive_choice(movi, bord)
 
 
 # priority in function names from right to left
@@ -315,6 +309,4 @@ over the two grey peons.
 But we don't necessarily need to add them to the AI
 """
 
-
 # todo: either incorporate content into board or make it just be a plain list.
-
