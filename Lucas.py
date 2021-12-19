@@ -168,6 +168,8 @@ def game(choice_fun="random", dbg=False):
             print(bord)
             if dbg: print(score(bord.order))
         except IndexError:
+            if bord.order == ['b6', 'b7', 'b8', 'b9', ' 4', ' 5', 'g0', 'g1', 'g2', 'g3']:
+                print("You've done did it Chemp!")
             cont = False
 
 
@@ -238,9 +240,8 @@ def max_center_choice(movi: list[dict], bord: Board, _) -> dict:
 def interactive_choice(movi: list[dict], bord: Board, peon_find: Content) -> dict:
     if not movi:
         raise IndexError
-    hlp = """A valid move is the name of a paon, followed by space and 's' or "step" for a move of 1 space 
-    or 'j' or "jump" for a move of 2 spaces. 
-    Type 'q', "quit" or "exit" to exit the program.
+    hlp = """A valid move is the name of a paon, followed by 's' or "step" for a move of 1 space 
+or followed by 'j' or "jump" for a move of 2 spaces. Type 'q', "quit" or "exit" to exit the program.
     """
     call = input("Move?\n > ").lower()
     call = call.split()
@@ -248,7 +249,7 @@ def interactive_choice(movi: list[dict], bord: Board, peon_find: Content) -> dic
         if call[0] in {"h", "help"}:
             print(hlp)
             return interactive_choice(movi, bord, peon_find)
-        elif call[0] in {"movi"}:
+        elif call[0] == "movi":
             print(movi)  # for debuging
             return interactive_choice(movi, bord, peon_find)
         elif call[0] in {'q', "quit", "exit"}:
