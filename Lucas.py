@@ -35,14 +35,14 @@ class Peon:
         try:
             dest_id = self.bord[self.place + dist * self.dir]
             # a place one or two steps to the left or to the right
-            return self.bord.peon_find(dest_id)
+            return dest_id
         except IndexError:
             return None
 
     def is_move(self, kind: str) -> bool:
         """returns boolean value of is it possible for a peon to move one space for step or two for jump"""
         dest = self.dest(kind)
-        return dest is not None and dest.color == ' '
+        return dest is not None and dest[0] == ' '
 
 
 class EmptySpace(Peon):
@@ -141,7 +141,7 @@ def move(bord: Board, mv: dict) -> list[str]:
     p, kind = mv["peon"], mv["kind"]
     n_bord = deepcopy(bord.order)
     place = bord.order.index(p.id)
-    emp = p.dest(kind)
+    emp = bord.peon_find(p.dest(kind))
     n_bord[emp.place] = p.id
     n_bord[place] = emp.id
     return n_bord
