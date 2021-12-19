@@ -54,8 +54,8 @@ class EmptySpace(Peon):
 
 
 class Board:
-    def __init__(self, order: list[str], peoni: set):
-        self.order = order
+    def __init__(self, peoni: list[Peon]):
+        self.order = [p.id for p in peoni]
         self.cntnt = {p.id: p for p in peoni}
 
     def __getitem__(self, i: int) -> str:
@@ -155,8 +155,8 @@ def game(choice_fun="random", nmr_side=4, nmr_emp=2, dbg=False):
     openning = [Peon('g', i) for i in range(nmr_side)]
     openning.extend([(EmptySpace(i + nmr_side)) for i in range(nmr_emp)])
     openning.extend([Peon('b', i + nmr_side + nmr_emp) for i in range(nmr_side)])
-    openids = [p.id for p in openning]
-    bord = Board(openids, set(openning))
+
+    bord = Board(openning)
     for p in openning:
         p.set_contacts(bord)
     print(bord)
