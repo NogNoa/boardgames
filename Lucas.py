@@ -80,6 +80,9 @@ class Board:
         """retruns the index (int) of a peon on the bord from grey side to black side"""
         return self.order.index(p_id)
 
+    def __len__(self):
+        return len(self.order)
+
 
 def score(order: list[str]) -> int:
     back = 0
@@ -149,10 +152,14 @@ def move(bord: Board, mv: dict) -> list[str]:
     return n_bord
 
 
-def game(choice_fun="random", dbg=False):
-    openning = [Peon('g', i) for i in range(4)]
-    openning.extend([(EmptySpace(i + 4)) for i in range(2)])
-    openning.extend([Peon('b', i + 6) for i in range(4)])
+def winscore(lng, nmr_side):
+    return (lng * 2 - nmr_side - 1) * nmr_side
+
+
+def game(choice_fun="random", nmr_side=4, nmr_emp=2, dbg=False):
+    openning = [Peon('g', i) for i in range(nmr_side)]
+    openning.extend([(EmptySpace(i + nmr_side)) for i in range(nmr_emp)])
+    openning.extend([Peon('b', i + nmr_side + nmr_emp) for i in range(nmr_side)])
     cntnt = Content(set(openning))
     openids = [p.id for p in openning]
     bord = Board(openids)
@@ -168,7 +175,7 @@ def game(choice_fun="random", dbg=False):
             print(bord)
             if dbg: print(score(bord.order))
         except IndexError:
-            if score(bord.order) == 60:
+            if score(bord.order) == winscore(len(bord), nmr_side):
                 print("You've done did it Chemp!")
             cont = False
 
@@ -288,7 +295,7 @@ if __name__ == "__main__":
         if args.choice not in choices:
             print("please enter a valid decision algorithm:\n\t", str(choices)[1:-1])
             exit(0)
-        game(args.choice, args.d)
+        game(args.choice, 4, 2, args.d)
 
 
     main()

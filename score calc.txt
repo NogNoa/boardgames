@@ -1,0 +1,38 @@
+def score(order: list[str]) -> int:
+    back = 0
+    for i, p in enumerate(order):
+        point = i
+        if p[0] == 'b':
+            point = len(order) - point - 1
+        elif p[0] == ' ':
+            point = 0
+        back += point
+    return back
+	
+for a finished board
+
+finised_score(ln = len(order):
+	back := 0
+	for i, p in ln,order:
+		if grey: 
+			back += i
+		if black
+			bacl += ln - i - 1
+			
+
+the black end in 0 to (ln-emp)/2
+and the sum for grey is the same so just double it from black
+blackscore = sum([0,ln-emp/2],ln - i - 1)=
+	(ln-1)(ln-emp)/2 - sum([0,ln-emp/2],i)=
+	(ln^2-ln(emp+1)+emp)/2 - (ln-emp/2)(ln-emp/2 -1)/2 =
+	(ln^2-ln(emp+1)+emp)/2 - (ln-emp/2)^2/2 -- ln-emp/4 =
+	(ln-emp)(ln - 1 - (ln-emp)/2/2 + 1/2 )/2 =
+	(ln-emp)(ln - 1/2 - (ln-emp)/4)/2
+	
+the black end in 0 to side
+blackscore = sum([0,side],ln - i - 1)=
+	(ln-1)side - sum([0,side],i)=
+	ln*side - side - side(side-1)/2 =
+	ln*side - side - side^2/2 -- side/2 =
+	ln*side - side/2 - side^2/2 =
+	side(ln - 1/2 - side/2)
