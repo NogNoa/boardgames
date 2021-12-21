@@ -66,7 +66,7 @@ class Content:
 
 
 class Board:
-    def __init__(self, order: list[str]):
+    def __init__(self, order: list):
         self.order = order
 
     def __getitem__(self, i: int) -> str:
@@ -84,7 +84,7 @@ class Board:
         return len(self.order)
 
 
-def score(order: list[str]) -> int:
+def score(order: list) -> int:
     back = 0
     for i, p in enumerate(order):
         point = i
@@ -96,7 +96,7 @@ def score(order: list[str]) -> int:
     return back
 
 
-def list_moves(bord: Board, peon_find: Content) -> list[dict]:
+def list_moves(bord: Board, peon_find: Content) -> list:
     """returns list of possible moves. each move formated as
     a pair of a peon object, a string for kind of move,
     and an int for the score of the move"""
@@ -115,7 +115,7 @@ def list_moves(bord: Board, peon_find: Content) -> list[dict]:
 # it might make prior blank direction hack unnecessary.
 
 
-def movi_score(movi: list, bord: Board, scrfunc) -> list[int]:
+def movi_score(movi: list, bord: Board, scrfunc) -> list:
     """take a list of moves without a score and adds a score"""
     scori = []
     for mv in movi:
@@ -125,7 +125,7 @@ def movi_score(movi: list, bord: Board, scrfunc) -> list[int]:
     return scori
 
 
-def emp_center_scr(consq: list[str]) -> int:
+def emp_center_scr(consq: list) -> int:
     scr = 0
     cntr = len(consq) / 2
     for i, p in enumerate(consq):
@@ -140,7 +140,7 @@ def emp_center_scr(consq: list[str]) -> int:
 """
 
 
-def move(bord: Board, mv: dict) -> list[str]:
+def move(bord: Board, mv: dict) -> list:
     """returns a new board object repesenting the state after the move is taken"""
     # deepcopy is used to let us look ahead at future boards without changing the current one
     p, kind = mv["peon"], mv["kind"]
@@ -156,7 +156,7 @@ def winscore(lng, nmr_side):
     return (lng * 2 - nmr_side - 1) * nmr_side
 
 
-def game(choice_fun="random", nmr_side=4, nmr_emp=2, dbg=False):
+def game(choice_fun, nmr_side=4, nmr_emp=2, dbg=False):
     openning = [Peon('g', i) for i in range(nmr_side)]
     openning.extend([(EmptySpace(i + nmr_side)) for i in range(nmr_emp)])
     openning.extend([Peon('b', i + nmr_side + nmr_emp) for i in range(nmr_side)])
@@ -180,11 +180,11 @@ def game(choice_fun="random", nmr_side=4, nmr_emp=2, dbg=False):
             cont = False
 
 
-def random_choice(movi: list[dict], _, __) -> dict:
+def random_choice(movi: list, _, __) -> dict:
     return rnd.choice(movi)
 
 
-def first_max_choice(movi: list[dict], bord: Board, _) -> dict:
+def first_max_choice(movi: list, bord: Board, _) -> dict:
     if not movi:
         raise IndexError
     scori = movi_score(movi, bord, score)
@@ -193,7 +193,7 @@ def first_max_choice(movi: list[dict], bord: Board, _) -> dict:
     return back
 
 
-def rand_max_choice(movi: list[dict], bord: Board, _) -> dict:
+def rand_max_choice(movi: list, bord: Board, _) -> dict:
     if not movi:
         raise IndexError
     scori = movi_score(movi, bord, score)
@@ -203,7 +203,7 @@ def rand_max_choice(movi: list[dict], bord: Board, _) -> dict:
     return back
 
 
-def emp_center_choice(movi: list[dict], bord: Board, _) -> dict:
+def emp_center_choice(movi: list, bord: Board, _) -> dict:
     if not movi:
         raise IndexError
     scori = movi_score(movi, bord, emp_center_scr)
@@ -213,7 +213,7 @@ def emp_center_choice(movi: list[dict], bord: Board, _) -> dict:
     return back
 
 
-def center_max_choice(movi: list[dict], bord: Board, _) -> dict:
+def center_max_choice(movi: list, bord: Board, _) -> dict:
     if not movi:
         raise IndexError
     maxi = movi_score(movi, bord, score)
@@ -226,7 +226,7 @@ def center_max_choice(movi: list[dict], bord: Board, _) -> dict:
     return back
 
 
-def max_center_choice(movi: list[dict], bord: Board, _) -> dict:
+def max_center_choice(movi: list, bord: Board, _) -> dict:
     if not movi:
         raise IndexError
     maxi = movi_score(movi, bord, score)
@@ -244,7 +244,7 @@ def max_center_choice(movi: list[dict], bord: Board, _) -> dict:
 """
 
 
-def interactive_choice(movi: list[dict], bord: Board, peon_find: Content) -> dict:
+def interactive_choice(movi: list, bord: Board, peon_find: Content) -> dict:
     if not movi:
         raise IndexError
     hlp = """A valid move is the name of a paon, followed by 's' or "step" for a move of 1 space 
@@ -288,7 +288,7 @@ if __name__ == "__main__":
         choices = {"max_center", "random", "first_max", "rand_max", "emp_center", "center_max", "interactive"}
         parser = argparse.ArgumentParser(
             description=f"a game of lucas. you can choose an algorithm or play interactively: {choices}")
-        parser.add_argument('choice', metavar="C", help="Algorithm to decide the moves", default="random")
+        parser.add_argument('choice', metavar="C", help="Algorithm to decide the moves", nargs="?", default="interactive")
         parser.add_argument("-d", help="turn on debug mode", action="store_true", )
         args = parser.parse_args()
 
