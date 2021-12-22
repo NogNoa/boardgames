@@ -282,7 +282,7 @@ if __name__ == "__main__":
         choices = {"max_center", "random", "first_max", "rand_max", "emp_center", "center_max", "interactive"}
         parser = argparse.ArgumentParser(
             description=f"a game of lucas. you can choose an algorithm or play interactively: {choices}")
-        parser.add_argument('choice', metavar="C", help="Algorithm to decide the moves", default="random")
+        parser.add_argument('choice', metavar="C", help="Algorithm to decide the moves", default="interactive")
         parser.add_argument("-d", help="turn on debug mode", action="store_true", )
         args = parser.parse_args()
 
@@ -309,4 +309,4 @@ over the two grey peons.
 But we don't necessarily need to add them to the AI
 """
 
-# todo: either incorporate content into board or make it just be a plain list.
+# todo: make empty peon less object and regular more?
