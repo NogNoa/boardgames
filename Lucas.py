@@ -115,7 +115,7 @@ def list_moves(bord: Board, peon_find: Content) -> list[dict[str:Peon, str:str]]
 # it might make prior blank direction hack unnecessary.
 
 
-def movi_score(movi: list[dict[str:]], bord: Board, scrfunc) -> list:
+def movi_score(movi: list[dict[str:]], bord: Board, scrfunc) -> list[int]:
     """take a list of moves without a score and adds a score"""
     scori = []
     for mov in movi:
@@ -302,5 +302,6 @@ if __name__ == "__main__":
 
     main()
 
-# todo: either incorporate content into board or make it just be a plain list.
-#  the interactive function is conditioned wrong. rethink.
+# todo: 
+#  make generic choice function, that accept score functions, and random.
+#   obviously doesn't include interactive choice
