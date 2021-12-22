@@ -247,9 +247,10 @@ def max_center_choice(movi: list, bord: Board, _) -> dict:
 def interactive_choice(movi: list, bord: Board, peon_find: Content) -> dict:
     if not movi:
         raise IndexError
-    hlp = """A valid move is the name of a paon, followed by 's' or "step" for a move of 1 space 
-or followed by 'j' or "jump" for a move of 2 spaces. Type 'q', "quit" or "exit" to exit the program.
-    """
+    hlp = \
+        """A valid move is the name of a paon, followed by 's' or "step" for a move of 1 space or followed by 'j' or 
+"jump" for a move of 2 spaces. Type 'q', "quit" or "exit" to exit the program.
+        """
     call = input("Move?\n > ").lower()
     call = call.split()
     if len(call) >= 1:
@@ -263,17 +264,17 @@ or followed by 'j' or "jump" for a move of 2 spaces. Type 'q', "quit" or "exit" 
             print("Be seeing you.")
             raise IndexError
         else:
-            move = {"peon": peon_find(call[0])}
+            mov = {"peon": peon_find(call[0])}
     else:
-        move = None
+        mov = None
     if len(call) >= 2:
-        move["kind"] = call[1]
-        if move["kind"] in {'j', 's'}:
-            move["kind"] = {'j': "jump", "s": "step"}[move["kind"]]
+        mov["kind"] = call[1]
+        if mov["kind"] in {'j', 's'}:
+            mov["kind"] = {'j': "jump", "s": "step"}[mov["kind"]]
         else:
-            move["kind"] = call[1]
-    if move in movi:
-        return move
+            mov["kind"] = call[1]
+    if mov in movi:
+        return mov
     else:
         print('please enter a vlid move.  If you need help just enter \'h\' or "help".')
         return interactive_choice(movi, bord, peon_find)
@@ -288,7 +289,8 @@ if __name__ == "__main__":
         choices = {"max_center", "random", "first_max", "rand_max", "emp_center", "center_max", "interactive"}
         parser = argparse.ArgumentParser(
             description=f"a game of lucas. you can choose an algorithm or play interactively: {choices}")
-        parser.add_argument('choice', metavar="C", help="Algorithm to decide the moves", nargs="?", default="interactive")
+        parser.add_argument('choice', metavar="C", nargs="?", default="interactive",
+                            help="Algorithm to decide the moves")
         parser.add_argument("-d", help="turn on debug mode", action="store_true", )
         args = parser.parse_args()
 
