@@ -302,6 +302,22 @@ if __name__ == "__main__":
 
     main()
 
-# todo: 
+"""
+the winning strategy is basicaly to identify dead blocks and avoid making them.
+a dead block is a block of peons, none of which could move, no matter of free spaces
+there is around the block.
+
+we don't need to take the ends of the board into account, in fact we have to desregard them.
+a block in the opposite end is fine this is the desired endstate of those peons, 
+and if the board didn't end those peons could have moved.
+
+good euristics are to seek to order the peons alternatingly re: their color; and to have and use "ladders".
+a ladder is when say a black peon has in front of him a patern "grey, emp, grey, emp" and using the ladder is jumping 
+over the two grey peons.
+But we don't necessarily need to add them to the AI
+"""
+
+# todo: either incorporate content into board or make it just be a plain list.
+#  the interactive function is conditioned wrong. rethink.
 #  make generic choice function, that accept score functions, and random.
 #   obviously doesn't include interactive choice
