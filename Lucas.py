@@ -6,11 +6,10 @@ class Peon:
     def __init__(self, color: str, ordinal: int):
         self.color = color
         self.id = color + str(ordinal)
-        self.bord = self.peon_find = None
+        self.bord = None
 
-    def set_contacts(self, bord, pfind):
+    def set_contacts(self, bord):
         self.bord = bord
-        self.peon_find = pfind
 
     def __str__(self):
         return self.id
@@ -36,14 +35,14 @@ class Peon:
         try:
             dest_id = self.bord[self.place + dist * self.dir]
             # a place one or two steps to the left or to the right
-            return self.peon_find(dest_id)
+            return dest_id
         except IndexError:
             return None
 
     def is_move(self, kind: str) -> bool:
         """returns boolean value of is it possible for a peon to move one space for step or two for jump"""
         dest = self.dest(kind)
-        return dest is not None and dest.color == ' '
+        return dest is not None and dest[0] == ' '
 
 
 class EmptySpace(Peon):
@@ -54,23 +53,16 @@ class EmptySpace(Peon):
         return False
 
 
-class Content:
-    def __init__(self, peoni: set):
-        self.val = {p.id: p for p in peoni}
-
-    def __call__(self, pid: str):
-        try:
-            return self.val[pid]
-        except KeyError:
-            return None
-
-
 class Board:
-    def __init__(self, order: list[str]):
-        self.order = order
+    def __init__(self, peoni: list[Peon]):
+        self.order = [p.id for p in peoni]
+        self.cntnt = {p.id: p for p in peoni}
 
     def __getitem__(self, i: int) -> str:
         return self.order[i]
+
+    def __len__(self):
+        return len(self.order)
 
     def __str__(self):
         """returns human readable list of unique peons"""
@@ -80,8 +72,11 @@ class Board:
         """retruns the index (int) of a peon on the bord from grey side to black side"""
         return self.order.index(p_id)
 
-    def __len__(self):
-        return len(self.order)
+    def peon_find(self, pid):
+        try:
+            return self.cntnt[pid]
+        except KeyError:
+            return None
 
 
 def score(order: list[str]) -> int:
@@ -96,13 +91,13 @@ def score(order: list[str]) -> int:
     return back
 
 
-def list_moves(bord: Board, peon_find: Content) -> list[dict[str:Peon, str:str]]:
+def list_moves(bord: Board) -> list[dict[str:Peon, str:str]]:
     """returns list of possible moves. each move formated as
     a pair of a peon object, a string for kind of move,
     and an int for the score of the move"""
     movi = []
     for p in bord:
-        p = peon_find(p)
+        p = bord.peon_find(p)
         if p.color == ' ':
             continue
         for k in {"step", "jump"}:
@@ -146,7 +141,7 @@ def move(bord: Board, mov: dict[str:Peon, str:str]) -> list[str]:
     p, kind = mov["peon"], mov["kind"]
     n_bord = deepcopy(bord.order)
     place = bord.order.index(p.id)
-    emp = p.dest(kind)
+    emp = bord.peon_find(p.dest(kind))
     n_bord[emp.place] = p.id
     n_bord[place] = emp.id
     return n_bord
@@ -160,17 +155,16 @@ def game(choice_fun, nmr_side=4, nmr_emp=2, dbg=False):
     openning = [Peon('g', i) for i in range(nmr_side)]
     openning.extend([(EmptySpace(i + nmr_side)) for i in range(nmr_emp)])
     openning.extend([Peon('b', i + nmr_side + nmr_emp) for i in range(nmr_side)])
-    cntnt = Content(set(openning))
-    openids = [p.id for p in openning]
-    bord = Board(openids)
+
+    bord = Board(openning)
     for p in openning:
-        p.set_contacts(bord, cntnt)
+        p.set_contacts(bord)
     print(bord)
     cont = True
     while cont:
-        movi = list_moves(bord, cntnt)
+        movi = list_moves(bord)
         try:
-            ch = eval(f"{choice_fun}_choice(movi, bord, cntnt)")
+            ch = eval(f"{choice_fun}_choice(movi, bord)")
             bord.order = move(bord, ch)
             print(bord)
             if dbg: print(score(bord.order))
@@ -244,7 +238,7 @@ def max_center_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, 
 """
 
 
-def interactive_choice(movi: list[dict[str:]], bord: Board, peon_find: Content) -> dict[str:Peon, str:str]:
+def interactive_choice(movi: list[dict[str:]], bord: Board) -> dict[str:Peon, str:str]:
     if not movi:
         raise IndexError
     hlp = \
@@ -256,15 +250,15 @@ def interactive_choice(movi: list[dict[str:]], bord: Board, peon_find: Content) 
     if len(call) >= 1:
         if call[0] in {"h", "help"}:
             print(hlp)
-            return interactive_choice(movi, bord, peon_find)
+            return interactive_choice(movi, bord)
         elif call[0] == "movi":
-            print(movi)  # for debuging
-            return interactive_choice(movi, bord, peon_find)
+            print(movi)  # for debugging
+            return interactive_choice(movi, bord)
         elif call[0] in {'q', "quit", "exit"}:
             print("Be seeing you.")
             raise IndexError
         else:
-            mov = {"peon": peon_find(call[0])}
+            mov = {"peon": bord.peon_find(call[0])}
     else:
         mov = None
     if len(call) >= 2:
@@ -277,7 +271,7 @@ def interactive_choice(movi: list[dict[str:]], bord: Board, peon_find: Content) 
         return mov
     else:
         print('please enter a vlid move.  If you need help just enter \'h\' or "help".')
-        return interactive_choice(movi, bord, peon_find)
+        return interactive_choice(movi, bord)
 
 
 # priority in function names from right to left
@@ -321,3 +315,4 @@ But we don't necessarily need to add them to the AI
 #  the interactive function is conditioned wrong. rethink.
 #  make generic choice function, that accept score functions, and random.
 #   obviously doesn't include interactive choice
+#  make empty peon less object and regular more?

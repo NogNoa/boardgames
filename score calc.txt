@@ -36,3 +36,5 @@ blackscore = sum([0,side],ln - i - 1)=
 	ln*side - side - side^2/2 -- side/2 =
 	ln*side - side/2 - side^2/2 =
 	side(ln - 1/2 - side/2)
+	
+score= side(2*ln - 1 - side)
