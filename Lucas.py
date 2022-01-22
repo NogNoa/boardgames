@@ -245,6 +245,13 @@ def interactive_choice(movi: list[dict[str:]], bord: Board) -> dict[str:Peon, st
         """
     call = input("Move?\n > ").lower()
     call = call.split()
+    mov = {}
+    if len(call) >= 2:
+        mov["kind"] = call[1]
+        if mov["kind"] in {'j', 's'}:
+            mov["kind"] = {'j': "jump", "s": "step"}[mov["kind"]]
+        else:
+            mov["kind"] = call[1]
     if len(call) >= 1:
         if call[0] in {"h", "help"}:
             print(hlp)
@@ -256,15 +263,7 @@ def interactive_choice(movi: list[dict[str:]], bord: Board) -> dict[str:Peon, st
             print("Be seeing you.")
             raise IndexError
         else:
-            mov = {"peon": bord.peon_find(call[0])}
-    else:
-        mov = None
-    if len(call) >= 2:
-        mov["kind"] = call[1]
-        if mov["kind"] in {'j', 's'}:
-            mov["kind"] = {'j': "jump", "s": "step"}[mov["kind"]]
-        else:
-            mov["kind"] = call[1]
+            mov["peon"] = bord.peon_find(call[0])
     if mov in movi:
         return mov
     else:
@@ -309,7 +308,6 @@ over the two grey peons.
 But we don't necessarily need to add them to the AI.
 """
 
-# todo: the interactive function is conditioned wrong. rethink.
-#  make generic choice function, that accept score functions, and random.
+# todo: make generic choice function, that accept score functions, and random.
 #   obviously doesn't include interactive choice
 #  make empty peon less object and regular more?
