@@ -83,10 +83,9 @@ class Board:
         # deepcopy is used to let us look ahead at future boards without changing the current one.
         p, kind = mov["peon"], mov["kind"]
         n_order = deepcopy(self.order)
-        place = self.order.index(p.id)
         emp = self.peon_find(p.dest(kind))
         n_order[emp.place] = p.id
-        n_order[place] = emp.id
+        n_order[p.place] = emp.id
         return n_order
 
 
@@ -310,8 +309,7 @@ over the two grey peons.
 But we don't necessarily need to add them to the AI.
 """
 
-# todo: either incorporate content into board or make it just be a plain list.
-#  the interactive function is conditioned wrong. rethink.
+# todo: the interactive function is conditioned wrong. rethink.
 #  make generic choice function, that accept score functions, and random.
 #   obviously doesn't include interactive choice
 #  make empty peon less object and regular more?
