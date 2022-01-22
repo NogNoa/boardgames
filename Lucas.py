@@ -19,7 +19,7 @@ class Peon:
 
     @property
     def dir(self):
-        """returns direction as positive or negative unit (int)"""
+        """Returns direction as positive or negative unit (int)"""
         dirdic = {'g': 1, ' ': 0, 'b': -1}
         try:
             return dirdic[self.color]
@@ -34,13 +34,13 @@ class Peon:
         dist = {"jump": 2, "step": 1}[kind]
         try:
             dest_id = self.bord[self.place + dist * self.dir]
-            # a place one or two steps to the left or to the right
+            # a place one or two steps to the left or to the right.
             return dest_id
         except IndexError:
             return None
 
     def is_move(self, kind: str) -> bool:
-        """returns boolean value of is it possible for a peon to move one space for step or two for jump"""
+        """Returns boolean value of is it possible for a peon to move one space for a step or two for a jump."""
         dest = self.dest(kind)
         return dest is not None and dest[0] == ' '
 
@@ -65,11 +65,11 @@ class Board:
         return len(self.order)
 
     def __str__(self):
-        """returns human readable list of unique peons"""
+        """Returns human readable list of unique peons"""
         return str(self.order)
 
     def place(self, p_id: str) -> int:
-        """retruns the index (int) of a peon on the bord from grey side to black side"""
+        """Retruns the index (int) of a peon on the bord from grey side to black side."""
         return self.order.index(p_id)
 
     def peon_find(self, pid):
@@ -77,6 +77,17 @@ class Board:
             return self.cntnt[pid]
         except KeyError:
             return None
+
+    def move(self, mov: dict[str:Peon, str:str]) -> list[str]:
+        """Returns a new board object repesenting the state after the move is taken."""
+        # deepcopy is used to let us look ahead at future boards without changing the current one.
+        p, kind = mov["peon"], mov["kind"]
+        n_order = deepcopy(self.order)
+        place = self.order.index(p.id)
+        emp = self.peon_find(p.dest(kind))
+        n_order[emp.place] = p.id
+        n_order[place] = emp.id
+        return n_order
 
 
 def score(order: list[str]) -> int:
@@ -92,9 +103,9 @@ def score(order: list[str]) -> int:
 
 
 def list_moves(bord: Board) -> list[dict[str:Peon, str:str]]:
-    """returns list of possible moves. each move formated as
-    a pair of a peon object, a string for kind of move,
-    and an int for the score of the move"""
+    """Returns list of possible moves. Each move formated as
+    a pair of a peon object, a string for the kind of move,
+    and an int for the score of the move."""
     movi = []
     for p in bord:
         p = bord.peon_find(p)
@@ -106,15 +117,15 @@ def list_moves(bord: Board) -> list[dict[str:Peon, str:str]]:
     return movi
 
 
-# skipping blank peon move listing fixes IndexError in this function in the endgame.
-# it might make prior blank direction hack unnecessary.
+# Skipping blank peon move listing fixes IndexError in this function in the endgame.
+# It might make prior blank direction hack unnecessary.
 
 
 def movi_score(movi: list[dict[str:]], bord: Board, scrfunc) -> list[int]:
-    """take a list of moves without a score and adds a score"""
+    """Take a list of moves without a score and adds a score."""
     scori = []
     for mov in movi:
-        consequnce = move(bord, mov)
+        consequnce = bord.move(mov)
         scr = scrfunc(consequnce)
         scori.append(scr)
     return scori
@@ -135,18 +146,6 @@ def emp_center_scr(consq: list[str]) -> int:
 """
 
 
-def move(bord: Board, mov: dict[str:Peon, str:str]) -> list[str]:
-    """returns a new board object repesenting the state after the move is taken"""
-    # deepcopy is used to let us look ahead at future boards without changing the current one
-    p, kind = mov["peon"], mov["kind"]
-    n_bord = deepcopy(bord.order)
-    place = bord.order.index(p.id)
-    emp = bord.peon_find(p.dest(kind))
-    n_bord[emp.place] = p.id
-    n_bord[place] = emp.id
-    return n_bord
-
-
 def winscore(lng, nmr_side):
     return (lng * 2 - nmr_side - 1) * nmr_side
 
@@ -164,8 +163,8 @@ def game(choice_fun, nmr_side=4, nmr_emp=2, dbg=False):
     while cont:
         movi = list_moves(bord)
         try:
-            ch = eval(f"{choice_fun}_choice(movi, bord)")
-            bord.order = move(bord, ch)
+            ch = eval(f"{choice_fun}_choice")(movi, bord)
+            bord.order = bord.move(ch)
             print(bord)
             if dbg: print(score(bord.order))
         except IndexError:
@@ -297,7 +296,7 @@ if __name__ == "__main__":
     main()
 
 """
-the winning strategy is basicaly to identify dead blocks and avoid making them.
+The winning strategy is basicaly to identify dead blocks and avoid making them.
 a dead block is a block of peons, none of which could move, no matter of free spaces
 there is around the block.
 
@@ -308,7 +307,7 @@ and if the board didn't end those peons could have moved.
 good euristics are to seek to order the peons alternatingly re: their color; and to have and use "ladders".
 a ladder is when say a black peon has in front of him a patern "grey, emp, grey, emp" and using the ladder is jumping 
 over the two grey peons.
-But we don't necessarily need to add them to the AI
+But we don't necessarily need to add them to the AI.
 """
 
 # todo: either incorporate content into board or make it just be a plain list.
