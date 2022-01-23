@@ -88,6 +88,20 @@ class Board:
         n_order[p.place] = emp.id
         return n_order
 
+    def list_moves(self) -> list[dict[str:Peon, str:str]]:
+        """Returns list of possible moves. Each move formated as
+        a pair of a peon object, a string for the kind of move,
+        and an int for the score of the move."""
+        movi = []
+        for p in self:
+            p = self.peon_find(p)
+            if p.color == ' ':
+                continue
+            for k in {"step", "jump"}:
+                if p.is_move(k):
+                    movi.append({'peon': p, 'kind': k})
+        return movi
+
 
 def score(order: list[str]) -> int:
     back = 0
@@ -101,19 +115,6 @@ def score(order: list[str]) -> int:
     return back
 
 
-def list_moves(bord: Board) -> list[dict[str:Peon, str:str]]:
-    """Returns list of possible moves. Each move formated as
-    a pair of a peon object, a string for the kind of move,
-    and an int for the score of the move."""
-    movi = []
-    for p in bord:
-        p = bord.peon_find(p)
-        if p.color == ' ':
-            continue
-        for k in {"step", "jump"}:
-            if p.is_move(k):
-                movi.append({'peon': p, 'kind': k})
-    return movi
 
 
 # Skipping blank peon move listing fixes IndexError in this function in the endgame.
@@ -160,7 +161,7 @@ def game(choice_fun, nmr_side=4, nmr_emp=2, dbg=False):
     print(bord)
     cont = True
     while cont:
-        movi = list_moves(bord)
+        movi = bord.list_moves()
         try:
             ch = eval(f"{choice_fun}_choice")(movi, bord)
             bord.order = bord.move(ch)
