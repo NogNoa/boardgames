@@ -115,8 +115,6 @@ def score(order: list[str]) -> int:
     return back
 
 
-
-
 # Skipping blank peon move listing fixes IndexError in this function in the endgame.
 # It might make prior blank direction hack unnecessary.
 
@@ -246,25 +244,19 @@ def interactive_choice(movi: list[dict[str:]], bord: Board) -> dict[str:Peon, st
         """
     call = input("Move?\n > ").lower()
     call = call.split()
-    mov = {}
-    if len(call) >= 2:
-        mov["kind"] = call[1]
-        if mov["kind"] in {'j', 's'}:
-            mov["kind"] = {'j': "jump", "s": "step"}[mov["kind"]]
-        else:
-            mov["kind"] = call[1]
-    if len(call) >= 1:
+    if call:
         if call[0] in {"h", "help"}:
             print(hlp)
             return interactive_choice(movi, bord)
-        elif call[0] == "movi":
-            print(movi)  # for debugging
+        elif call[0] in dir():  # bord hlp movi call
+            print(eval(call[0]))  # for debugging
             return interactive_choice(movi, bord)
         elif call[0] in {'q', "quit", "exit"}:
             print("Be seeing you.")
             raise IndexError
-        else:
-            mov["peon"] = bord.peon_find(call[0])
+    mov = {"peon": call[0] if call else '', "kind": call[1] if len(call) >= 2 else ''}
+    if mov["kind"] in {'j', 's'}:
+        mov["kind"] = {'j': "jump", "s": "step"}[mov["kind"]]
     if mov in movi:
         return mov
     else:
