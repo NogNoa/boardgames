@@ -148,7 +148,7 @@ def winscore(lng, nmr_side):
     return (lng * 2 - nmr_side - 1) * nmr_side
 
 
-def game(choice_fun, nmr_side=4, nmr_emp=2, dbg=False):
+def game(choice_fun="interactive", nmr_side=4, nmr_emp=2, dbg=False):
     openning = [Peon('g', i) for i in range(nmr_side)]
     openning.extend([(EmptySpace(i + nmr_side)) for i in range(nmr_emp)])
     openning.extend([Peon('b', i + nmr_side + nmr_emp) for i in range(nmr_side)])
@@ -164,7 +164,8 @@ def game(choice_fun, nmr_side=4, nmr_emp=2, dbg=False):
             ch = eval(f"{choice_fun}_choice")(movi, bord)
             bord.order = bord.move(ch)
             print(bord)
-            if dbg: print(score(bord.order))
+            if dbg:
+                print(score(bord.order))
         except IndexError:
             if score(bord.order) == winscore(len(bord), nmr_side):
                 print("You've done did it Chemp!")
@@ -275,13 +276,15 @@ if __name__ == "__main__":
             description=f"a game of lucas. you can choose an algorithm or play interactively: {choices}")
         parser.add_argument('choice', metavar="C", nargs="?", default="interactive",
                             help="Algorithm to decide the moves")
+        parser.add_argument("-p", help="Number of peons on each side", default=4)
+        parser.add_argument("-e", help="Number of empty spaces in the middle", default=2)
         parser.add_argument("-d", help="turn on debug mode", action="store_true", )
         args = parser.parse_args()
 
         if args.choice not in choices:
             print("please enter a valid decision algorithm:\n\t", str(choices)[1:-1])
             exit(0)
-        game(args.choice, 4, 2, args.d)
+        game(args.choice, args.p, args.e, args.d)
 
 
     main()
