@@ -6,6 +6,7 @@ class Peon:
     def __init__(self, color: str, ordinal: int):
         self.color = color
         self.id = color + str(ordinal)
+        self.dir_cached = None
         self.bord = None
 
     def set_contacts(self, bord):
@@ -20,11 +21,9 @@ class Peon:
     @property
     def dir(self):
         """Returns direction as positive or negative unit (int)"""
-        dirdic = {'g': 1, ' ': 0, 'b': -1}
-        try:
-            return dirdic[self.color]
-        except KeyError:
-            return None
+        if not self.dir_cached:
+            self.dir_cached = {'g': 1, ' ': 0, 'b': -1}[self.color]
+        return self.dir_cached
 
     @property
     def place(self) -> int:
@@ -172,11 +171,25 @@ def game(choice_fun="interactive", nmr_side=4, nmr_emp=2, dbg=False):
             cont = False
 
 
-def random_choice(movi: list[dict[str:]], _, __) -> dict[str:Peon, str:str]:
+def general_choice(movi: list[dict[str, any]], bord: Board, _, chfn: tuple[str]) -> dict[[str, Peon], [str, str]]:
+    if chfn == ("rand",):
+        return rnd.choice(movi)
+    if "max" in chfn:
+        maxi = movi_score(movi, bord, score)
+        best = max(maxi)
+        if "rand" in chfn:
+            besti = [pl for pl, scr in enumerate(maxi) if scr == best]
+            movkey = rnd.choice(besti)
+        elif "first" in chfn:
+            movkey = maxi.index(best)
+    return movi[movkey]
+
+
+def random_choice(movi: list[dict[str:]], _, __) -> dict[str, any]:
     return rnd.choice(movi)
 
 
-def first_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, str:str]:
+def first_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[[str, Peon], [str, str]]:
     if not movi:
         raise IndexError
     scori = movi_score(movi, bord, score)
