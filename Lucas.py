@@ -6,7 +6,7 @@ class Peon:
     def __init__(self, color: str, ordinal: int):
         self.color = color
         self.id = color + str(ordinal)
-        self.dir_cached = None
+        self.dir = self.dir()
         self.bord = None
 
     def set_contacts(self, bord):
@@ -18,12 +18,9 @@ class Peon:
     def __repr__(self):
         return self.id
 
-    @property
     def dir(self):
         """Returns direction as positive or negative unit (int)"""
-        if not self.dir_cached:
-            self.dir_cached = {'g': 1, ' ': 0, 'b': -1}[self.color]
-        return self.dir_cached
+        return {'g': 1, ' ': 0, 'b': -1}[self.color]
 
     @property
     def place(self) -> int:
