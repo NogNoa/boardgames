@@ -172,16 +172,15 @@ def game(choice_fun="interactive", nmr_side=4, nmr_emp=2, dbg=False):
 
 
 def general_choice(movi: list[dict[str, any]], bord: Board, _, chfn: tuple[str]) -> dict[[str, Peon], [str, str]]:
-    if chfn == ("rand",):
-        return rnd.choice(movi)
+    prefer = list(movi)[0]
     if "max" in chfn:
         maxi = movi_score(movi, bord, score)
-        best = max(maxi)
-        if "rand" in chfn:
-            besti = [pl for pl, scr in enumerate(maxi) if scr == best]
-            movkey = rnd.choice(besti)
-        elif "first" in chfn:
-            movkey = maxi.index(best)
+        prefer = max(maxi)
+        movi = [pl for pl, scr in enumerate(maxi) if scr == prefer]
+    if "rand" in chfn:
+        movkey = rnd.choice(movi)
+    elif "first" in chfn:
+        movkey = movi.index(prefer)
     return movi[movkey]
 
 
