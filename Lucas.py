@@ -30,15 +30,11 @@ class Peon:
     def dest(self, kind: str):
         dist = {"jump": 2, "step": 1}[kind]
         dest_ind = self.place + dist * self.dir
+        # a place one or two steps to the left or to the right.
         if not 0 <= dest_ind < len(self.bord):
             return None
-        try:
-            dest_id = self.bord[dest_ind]
-            # a place one or two steps to the left or to the right.
-        except IndexError:
-            return None
         else:
-            return dest_id
+            return self.bord[dest_ind]
 
     def is_move(self, kind: str) -> bool:
         """Returns boolean value of is it possible for a peon to move one space for a step or two for a jump."""
