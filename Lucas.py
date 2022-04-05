@@ -29,12 +29,16 @@ class Peon:
 
     def dest(self, kind: str):
         dist = {"jump": 2, "step": 1}[kind]
+        dest_ind = self.place + dist * self.dir
+        if not 0 <= dest_ind < len(self.bord):
+            return None
         try:
-            dest_id = self.bord[self.place + dist * self.dir]
+            dest_id = self.bord[dest_ind]
             # a place one or two steps to the left or to the right.
-            return dest_id
         except IndexError:
             return None
+        else:
+            return dest_id
 
     def is_move(self, kind: str) -> bool:
         """Returns boolean value of is it possible for a peon to move one space for a step or two for a jump."""
@@ -252,6 +256,7 @@ def interactive_choice(movi: list[dict[str:]], bord: Board) -> dict[str:Peon, st
             print("Be seeing you.")
             raise IndexError
     mov = {"peon": call[0] if call else '', "kind": call[1] if len(call) >= 2 else ''}
+    mov["peon"] = bord.peon_find(mov["peon"])
     if mov["kind"] in {'j', 's'}:
         mov["kind"] = {'j': "jump", "s": "step"}[mov["kind"]]
     if mov in movi:
