@@ -168,19 +168,6 @@ def game(choice_fun="interactive", nmr_side=4, nmr_emp=2, dbg=False):
             cont = False
 
 
-def general_choice(movi: list[dict[str, any]], bord: Board, _, chfn: tuple[str]) -> dict[[str, Peon], [str, str]]:
-    prefer = list(movi)[0]
-    if "max" in chfn:
-        maxi = movi_score(movi, bord, score)
-        prefer = max(maxi)
-        movi = [pl for pl, scr in enumerate(maxi) if scr == prefer]
-    if "rand" in chfn:
-        movkey = rnd.choice(movi)
-    elif "first" in chfn:
-        movkey = movi.index(prefer)
-    return movi[movkey]
-
-
 def random_choice(movi: list[dict[str:]], _, __) -> dict[str, any]:
     return rnd.choice(movi)
 
@@ -313,6 +300,9 @@ over the two grey peons.
 But we don't necessarily need to add them to the AI.
 """
 
-# todo: make generic choice function, that accept score functions, and random.
-#   obviously doesn't include interactive choice
+# todo:
+#  obviously doesn't include interactive choice
 #  make empty peon less object and regular more?
+
+# don't:
+# make generic choice function, that accept score functions, and random.
