@@ -10,7 +10,8 @@ class Peon:
         self.bord = None
 
     def set_contacts(self, bord):
-        self.bord = bord
+        self.bord = bord if not self.bord else self.bord
+        # safety by first board wins
 
     def __str__(self):
         return self.id
@@ -53,6 +54,8 @@ class Board:
     def __init__(self, peoni: list[Peon]):
         self.order = [p.id for p in peoni]
         self.cntnt = {p.id: p for p in peoni}
+        for p in peoni:
+            p.set_contacts(self)
 
     def __getitem__(self, i: int) -> str:
         return self.order[i]
@@ -148,10 +151,7 @@ def game(choice_fun="interactive", nmr_side=4, nmr_emp=2, dbg=False):
     openning = [Peon('g', i) for i in range(nmr_side)]
     openning.extend([(EmptySpace(i + nmr_side)) for i in range(nmr_emp)])
     openning.extend([Peon('b', i + nmr_side + nmr_emp) for i in range(nmr_side)])
-
     bord = Board(openning)
-    for p in openning:
-        p.set_contacts(bord)
     print(bord)
     cont = True
     while cont:
