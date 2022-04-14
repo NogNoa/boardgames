@@ -147,6 +147,10 @@ def winscore(lng, nmr_side):
     return (lng * 2 - nmr_side - 1) * nmr_side
 
 
+class NoMoveError(Exception):
+    pass
+
+
 def game(choice_fun="interactive", nmr_side=4, nmr_emp=2, dbg=False):
     openning = [Peon('g', i) for i in range(nmr_side)]
     openning.extend([(EmptySpace(i + nmr_side)) for i in range(nmr_emp)])
@@ -162,7 +166,7 @@ def game(choice_fun="interactive", nmr_side=4, nmr_emp=2, dbg=False):
             print(bord)
             if dbg:
                 print(score(bord.order))
-        except IndexError:
+        except (IndexError, NoMoveError):
             if score(bord.order) == winscore(len(bord), nmr_side):
                 print("You've done did it Chemp!")
             break
@@ -174,7 +178,7 @@ def random_choice(movi: list[dict[str:]], _, __) -> dict[str, any]:
 
 def first_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[[str, Peon], [str, str]]:
     if not movi:
-        raise IndexError
+        raise NoMoveError
     scori = movi_score(movi, bord, score)
     best = max(scori)
     back = movi[scori.index(best)]
@@ -183,7 +187,7 @@ def first_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[[str, Peon]
 
 def rand_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, str:str]:
     if not movi:
-        raise IndexError
+        raise NoMoveError
     scori = movi_score(movi, bord, score)
     best = max(scori)
     besti = [pl for pl, scr in enumerate(scori) if scr == best]
@@ -193,7 +197,7 @@ def rand_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, st
 
 def emp_center_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, str:str]:
     if not movi:
-        raise IndexError
+        raise NoMoveError
     scori = movi_score(movi, bord, emp_center_scr)
     best = max(scori)
     besti = [pl for pl, scr in enumerate(scori) if scr == best]
@@ -203,7 +207,7 @@ def emp_center_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, 
 
 def center_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, str:str]:
     if not movi:
-        raise IndexError
+        raise NoMoveError
     maxi = movi_score(movi, bord, score)
     centri = movi_score(movi, bord, emp_center_scr)
     best_score = max(maxi)
@@ -216,7 +220,7 @@ def center_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, 
 
 def max_center_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, str:str]:
     if not movi:
-        raise IndexError
+        raise NoMoveError
     maxi = movi_score(movi, bord, score)
     centri = movi_score(movi, bord, emp_center_scr)
     best_center = max(centri)
@@ -234,7 +238,7 @@ def max_center_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, 
 
 def interactive_choice(movi: list[dict[str:]], bord: Board) -> dict[str:Peon, str:str]:
     if not movi:
-        raise IndexError
+        raise NoMoveError
     hlp = \
         """A valid move is the name of a paon, followed by 's' or "step" for a move of 1 space or followed by 'j' or 
 "jump" for a move of 2 spaces. Type 'q', "quit" or "exit" to exit the program.
@@ -249,7 +253,7 @@ def interactive_choice(movi: list[dict[str:]], bord: Board) -> dict[str:Peon, st
                 print(eval(call[0]))  # for debugging
             elif call[0] in {'q', "quit", "exit"}:
                 print("Be seeing you.")
-                raise IndexError
+                raise NoMoveError
             else:
                 break
     mov = {"peon": call[0] if call else '', "kind": call[1] if len(call) >= 2 else ''}
