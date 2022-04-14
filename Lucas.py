@@ -153,11 +153,12 @@ def game(choice_fun="interactive", nmr_side=4, nmr_emp=2, dbg=False):
     openning.extend([Peon('b', i + nmr_side + nmr_emp) for i in range(nmr_side)])
     bord = Board(openning)
     print(bord)
+    choice_fun = eval(f"{choice_fun}_choice")
     cont = True
     while cont:
         movi = bord.list_moves()
         try:
-            ch = eval(f"{choice_fun}_choice")(movi, bord)
+            ch = choice_fun(movi, bord)
             bord.order = bord.move(ch)
             print(bord)
             if dbg:
