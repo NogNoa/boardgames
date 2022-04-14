@@ -154,8 +154,7 @@ def game(choice_fun="interactive", nmr_side=4, nmr_emp=2, dbg=False):
     bord = Board(openning)
     print(bord)
     choice_fun = eval(f"{choice_fun}_choice")
-    cont = True
-    while cont:
+    while True:
         movi = bord.list_moves()
         try:
             ch = choice_fun(movi, bord)
@@ -166,7 +165,7 @@ def game(choice_fun="interactive", nmr_side=4, nmr_emp=2, dbg=False):
         except IndexError:
             if score(bord.order) == winscore(len(bord), nmr_side):
                 print("You've done did it Chemp!")
-            cont = False
+            break
 
 
 def random_choice(movi: list[dict[str:]], _, __) -> dict[str, any]:
@@ -240,18 +239,19 @@ def interactive_choice(movi: list[dict[str:]], bord: Board) -> dict[str:Peon, st
         """A valid move is the name of a paon, followed by 's' or "step" for a move of 1 space or followed by 'j' or 
 "jump" for a move of 2 spaces. Type 'q', "quit" or "exit" to exit the program.
         """
-    call = input("Move?\n > ").lower()
-    call = call.split()
-    if call:
-        if call[0] in {"h", "help"}:
-            print(hlp)
-            return interactive_choice(movi, bord)
-        elif call[0] in dir():  # bord hlp movi call
-            print(eval(call[0]))  # for debugging
-            return interactive_choice(movi, bord)
-        elif call[0] in {'q', "quit", "exit"}:
-            print("Be seeing you.")
-            raise IndexError
+    while True:
+        call = input("Move?\n > ").lower()
+        call = call.split()
+        if call:
+            if call[0] in {"h", "help"}:
+                print(hlp)
+            elif call[0] in dir():  # bord hlp movi call
+                print(eval(call[0]))  # for debugging
+            elif call[0] in {'q', "quit", "exit"}:
+                print("Be seeing you.")
+                raise IndexError
+            else:
+                break
     mov = {"peon": call[0] if call else '', "kind": call[1] if len(call) >= 2 else ''}
     mov["peon"] = bord.peon_find(mov["peon"])
     if mov["kind"] in {'j', 's'}:
