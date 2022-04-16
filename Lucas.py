@@ -172,11 +172,22 @@ def game(choice_fun="interactive", nmr_side=4, nmr_emp=2, dbg=False):
             break
 
 
-def random_choice(movi: list[dict[str:]], _, __) -> dict[str, any]:
+def random_choice(movi: list[dict[str:]]) -> dict[str, any]:
     return rnd.choice(movi)
 
 
-def first_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[[str, Peon], [str, str]]:
+def choice(ch_fun):
+    def general_choice(movi, *args, **kwargs)-> dict[[str, Peon], [str, str]]:
+        if not movi:
+            raise NoMoveError
+        besti = ch_fun(movi, *args, **kwargs)
+        back = movi[rnd.choice(besti)]
+        return back
+
+    return general_choice
+
+
+def first_max_choice(movi: list[dict[str:]], bord: Board) -> dict[[str, Peon], [str, str]]:
     if not movi:
         raise NoMoveError
     scori = movi_score(movi, bord, score)
@@ -185,63 +196,38 @@ def first_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[[str, Peon]
     return back
 
 
-def rand_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, str:str]:
-    if not movi:
-        raise NoMoveError
+@choice
+def rand_max_choice(movi: list[dict[str:]], bord: Board) -> list[int]:
     scori = movi_score(movi, bord, score)
     best = max(scori)
-    besti = [pl for pl, scr in enumerate(scori) if scr == best]
-    back = movi[rnd.choice(besti)]
-    return back
+    return [pl for pl, scr in enumerate(scori) if scr == best]
 
 
-def emp_center_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, str:str]:
-    if not movi:
-        raise NoMoveError
+@choice
+def emp_center_choice(movi: list[dict[str:]], bord: Board) -> list[int]:
     scori = movi_score(movi, bord, emp_center_scr)
     best = max(scori)
-    besti = [pl for pl, scr in enumerate(scori) if scr == best]
-    back = movi[rnd.choice(besti)]
-    return back
+    return [pl for pl, scr in enumerate(scori) if scr == best]
 
 
-def center_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, str:str]:
-    if not movi:
-        raise NoMoveError
+@choice
+def center_max_choice(movi: list[dict[str:]], bord: Board) -> list[int]:
     maxi = movi_score(movi, bord, score)
     centri = movi_score(movi, bord, emp_center_scr)
     best_score = max(maxi)
     besti = [scr if maxi[pl] == best_score else 0 for pl, scr in enumerate(centri)]
     best_center = max(besti)
-    besti = [pl for pl, scr in enumerate(besti) if scr == best_center]
-    back = movi[rnd.choice(besti)]
-    return back
+    return [pl for pl, scr in enumerate(besti) if scr == best_center]
 
 
-def max_center_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, str:str]:
-    if not movi:
-        raise NoMoveError
+@choice
+def max_center_choice(movi: list[dict[str:]], bord: Board) -> list[int]:
     maxi = movi_score(movi, bord, score)
     centri = movi_score(movi, bord, emp_center_scr)
     best_center = max(centri)
     besti = [scr if centri[pl] == best_center else 0 for pl, scr in enumerate(maxi)]
     best_score = max(besti)
-    besti = [pl for pl, scr in enumerate(besti) if scr == best_score]
-    back = movi[rnd.choice(besti)]
-    return back
-
-
-def general_choice(scr_fun1: callable, scr_fun2: callable, movi: list[dict[str:]], bord: Board, *args) -> dict[[str, Peon], [str, str]]:
-    if not movi:
-        raise NoMoveError
-    scori1 = movi_score(movi, bord, scr_fun1)
-    scori2 = movi_score(movi, bord, scr_fun2)
-    best2 = max(scori2)
-    besti = [scr if scori2[pl] == best2 else 0 for pl, scr in enumerate(scori1)]
-    best = max(besti)
-    besti = [pl for pl, scr in enumerate(besti) if scr == best]
-    back = movi[rnd.choice(besti)]
-    return back
+    return [pl for pl, scr in enumerate(besti) if scr == best_score]
 
 
 """def keep_options_choice(movi: list[dict], bord: Board, pf: Content) -> dict:
