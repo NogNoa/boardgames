@@ -231,6 +231,19 @@ def max_center_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, 
     return back
 
 
+def general_choice(scr_fun1: callable, scr_fun2: callable, movi: list[dict[str:]], bord: Board, *args) -> dict[[str, Peon], [str, str]]:
+    if not movi:
+        raise NoMoveError
+    scori1 = movi_score(movi, bord, scr_fun1)
+    scori2 = movi_score(movi, bord, scr_fun2)
+    best2 = max(scori2)
+    besti = [scr if scori2[pl] == best2 else 0 for pl, scr in enumerate(scori1)]
+    best = max(besti)
+    besti = [pl for pl, scr in enumerate(besti) if scr == best]
+    back = movi[rnd.choice(besti)]
+    return back
+
+
 """def keep_options_choice(movi: list[dict], bord: Board, pf: Content) -> dict:
     scori = movi_score(movi, bord, movi_count)
 """
