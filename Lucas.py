@@ -177,7 +177,7 @@ def random_choice(movi: list[dict[str:]]) -> dict[str, any]:
 
 
 def choice(ch_fun):
-    def general_choice(movi, *args, **kwargs)-> dict[[str, Peon], [str, str]]:
+    def general_choice(movi, *args, **kwargs) -> dict[[str, Peon], [str, str]]:
         if not movi:
             raise NoMoveError
         besti = ch_fun(movi, *args, **kwargs)
@@ -197,37 +197,20 @@ def first_max_choice(movi: list[dict[str:]], bord: Board) -> dict[[str, Peon], [
 
 
 @choice
-def rand_max_choice(movi: list[dict[str:]], bord: Board) -> list[int]:
-    scori = movi_score(movi, bord, score)
+def single_pref_choice(movi: list[dict[str:]], bord: Board, scr_fun) -> list[int]:
+    scori = movi_score(movi, bord, scr_fun)
     best = max(scori)
     return [pl for pl, scr in enumerate(scori) if scr == best]
 
 
 @choice
-def emp_center_choice(movi: list[dict[str:]], bord: Board) -> list[int]:
-    scori = movi_score(movi, bord, emp_center_scr)
-    best = max(scori)
-    return [pl for pl, scr in enumerate(scori) if scr == best]
-
-
-@choice
-def center_max_choice(movi: list[dict[str:]], bord: Board) -> list[int]:
-    maxi = movi_score(movi, bord, score)
-    centri = movi_score(movi, bord, emp_center_scr)
-    best_score = max(maxi)
-    besti = [scr if maxi[pl] == best_score else 0 for pl, scr in enumerate(centri)]
-    best_center = max(besti)
-    return [pl for pl, scr in enumerate(besti) if scr == best_center]
-
-
-@choice
-def max_center_choice(movi: list[dict[str:]], bord: Board) -> list[int]:
-    maxi = movi_score(movi, bord, score)
-    centri = movi_score(movi, bord, emp_center_scr)
-    best_center = max(centri)
-    besti = [scr if centri[pl] == best_center else 0 for pl, scr in enumerate(maxi)]
-    best_score = max(besti)
-    return [pl for pl, scr in enumerate(besti) if scr == best_score]
+def two_pref_choice(movi: list[dict[str:]], bord: Board, scr_fun1, scr_fun2) -> list[int]:
+    scori1 = movi_score(movi, bord, scr_fun1)
+    scori2 = movi_score(movi, bord, scr_fun2)
+    best_score1 = max(scori1)
+    besti = [scr if scori1[pl] == best_score1 else 0 for pl, scr in enumerate(scori2)]
+    best_of_both = max(besti)
+    return [pl for pl, scr in enumerate(besti) if scr == best_of_both]
 
 
 """def keep_options_choice(movi: list[dict], bord: Board, pf: Content) -> dict:
@@ -308,6 +291,7 @@ But we don't necessarily need to add them to the AI.
 # todo:
 #  obviously doesn't include interactive choice
 #  make empty peon less object and regular more?
+#  generic choice functions (glue code)
 
 # don't:
 # make generic choice function, that accept score functions, and random.
