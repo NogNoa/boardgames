@@ -187,10 +187,10 @@ def choice(ch_fun):
     return general_choice
 
 
-def first_max_choice(movi: list[dict[str:]], bord: Board) -> dict[[str, Peon], [str, str]]:
+def first_max_choice(movi: list[dict[str:]], bord: Board, scr_fun=score) -> dict[[str, Peon], [str, str]]:
     if not movi:
         raise NoMoveError
-    scori = movi_score(movi, bord, score)
+    scori = movi_score(movi, bord, scr_fun)
     best = max(scori)
     back = movi[scori.index(best)]
     return back
@@ -204,11 +204,11 @@ def single_pref_choice(movi: list[dict[str:]], bord: Board, scr_fun) -> list[int
 
 
 @choice
-def two_pref_choice(movi: list[dict[str:]], bord: Board, scr_fun1, scr_fun2) -> list[int]:
-    scori1 = movi_score(movi, bord, scr_fun1)
-    scori2 = movi_score(movi, bord, scr_fun2)
-    best_score1 = max(scori1)
-    besti = [scr if scori1[pl] == best_score1 else 0 for pl, scr in enumerate(scori2)]
+def two_pref_choice(movi: list[dict[str:]], bord: Board, scr_fun_1, scr_fun_2) -> list[int]:
+    scori_1 = movi_score(movi, bord, scr_fun_1)
+    scori_2 = movi_score(movi, bord, scr_fun_2)
+    max_1 = max(scori_1)
+    besti = [scr if scori_1[pl] == max_1 else 0 for pl, scr in enumerate(scori_2)]
     best_of_both = max(besti)
     return [pl for pl, scr in enumerate(besti) if scr == best_of_both]
 
