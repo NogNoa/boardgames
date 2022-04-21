@@ -53,7 +53,7 @@ class EmptySpace(Peon):
         super().__init__(' ', ordinal)
 
     @staticmethod
-    def is_move() -> bool:
+    def is_move(*args) -> bool:
         return False
 
 
@@ -264,16 +264,16 @@ if __name__ == "__main__":
 
         choices = {"max_center", "random", "first_max", "rand_max", "emp_center", "center_max", "interactive"}
         parser = argparse.ArgumentParser(
-            description=f"a game of lucas. you can choose an algorithm or play interactively: {choices}")
+            description=f"A game of lucas. you can choose an algorithm or play interactively: {choices}")
         parser.add_argument('choice', metavar="C", nargs="?", default="interactive",
                             help="Algorithm to decide the moves")
         parser.add_argument("-p", help="Number of peons on each side", default=4)
         parser.add_argument("-e", help="Number of empty spaces in the middle", default=2)
-        parser.add_argument("-d", help="turn on debug mode", action="store_true", )
+        parser.add_argument("-d", help="Turn on debug mode", action="store_true", )
         args = parser.parse_args()
 
         if args.choice not in choices:
-            print("please enter a valid decision algorithm:\n\t", str(choices)[1:-1])
+            print("Please enter a valid decision algorithm:\n\t", str(choices)[1:-1])
             exit(0)
         game(args.choice, args.p, args.e, args.d)
 
