@@ -179,7 +179,7 @@ def game(choice_fun="interactive", nmr_side=4, nmr_emp=2, dbg=False):
             break
 
 
-def random_choice(movi: list[dict[str:]]) -> dict[str, any]:
+def random_choice(movi: list[dict[str:]]) -> dict[[str, Peon], [str, str]]:
     return rnd.choice(movi)
 
 
@@ -225,7 +225,7 @@ def two_pref_choice(movi: list[dict[str:]], bord: Board, scr_fun_1, scr_fun_2) -
 """
 
 
-def interactive_choice(movi: list[dict[str:]], bord: Board) -> dict[str:Peon, str:str]:
+def interactive_choice(movi: list[dict[str:]], bord: Board) -> dict[[str, Peon], [str, str]]:
     if not movi:
         raise NoMoveError
     hlp = \
