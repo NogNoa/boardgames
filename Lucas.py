@@ -52,9 +52,14 @@ class Board:
         def is_move(self, _) -> bool:
             return False
 
-    def __init__(self, peoni: list[Peon]):
+    def __init__(self, nmr_side, nmr_emp):
+        peoni = [Board.Peon('g', i) for i in range(nmr_side)]
+        peoni.extend([(Board.EmptySpace(i + nmr_side)) for i in range(nmr_emp)])
+        peoni.extend([Board.Peon('b', i + nmr_side + nmr_emp) for i in range(nmr_side)])
         self.order = [p.id for p in peoni]
         self.cntnt = {p.id: p for p in peoni}
+        for p in peoni:
+            p.set_contacts(self)
 
     def __getitem__(self, i: int) -> str:
         return self.order[i]
@@ -65,13 +70,6 @@ class Board:
     def __str__(self):
         """returns human readable list of unique peons"""
         return str(self.order)
-
-    @staticmethod
-    def opening(nmr_side, nmr_emp):
-        openning = [Board.Peon('g', i) for i in range(nmr_side)]
-        openning.extend([(Board.EmptySpace(i + nmr_side)) for i in range(nmr_emp)])
-        openning.extend([Board.Peon('b', i + nmr_side + nmr_emp) for i in range(nmr_side)])
-        return openning
 
     def place(self, p_id: str) -> int:
         """Retruns the index (int) of a peon on the bord from grey side to black side"""
@@ -156,11 +154,8 @@ def winscore(lng, nmr_side):
     return (lng * 2 - nmr_side - 1) * nmr_side
 
 
-def game(choice_fun, nmr_side=4, nmr_emp=2, dbg=False):
-    bord = Board(Board.opening(nmr_side, nmr_emp))
-    for p in bord:
-        p = bord.peon_find(p)
-        p.set_contacts(bord)
+def game(choice_fun, nmr_side=4, nmr_emp=2):
+    bord = Board(nmr_side, nmr_emp)
     print(bord)
     cont = True
     while cont:
@@ -169,7 +164,7 @@ def game(choice_fun, nmr_side=4, nmr_emp=2, dbg=False):
             ch = eval(f"{choice_fun}_choice(movi, bord)")
             bord.order = move(bord, ch)
             print(bord)
-            if dbg: print(score(bord.order))
+            if debug: print(score(bord.order))
         except IndexError:
             if score(bord.order) == winscore(len(bord), nmr_side):
                 print("You've done did it Chemp!")
@@ -281,6 +276,7 @@ def interactive_choice(movi: list[dict[str:]], bord: Board) -> dict[str, any]:
 if __name__ == "__main__":
     def main():
         import argparse
+        global debug
 
         choices = {"max_center", "random", "first_max", "rand_max", "emp_center", "center_max", "interactive"}
         parser = argparse.ArgumentParser(
@@ -289,13 +285,14 @@ if __name__ == "__main__":
                             help="Algorithm to decide the moves")
         parser.add_argument("-d", help="turn on debug mode", action="store_true", )
         args = parser.parse_args()
+        debug = args.d
 
         if args.choice not in choices:
             print("please enter a valid decision algorithm:\n\t", str(choices)[1:-1])
             exit(0)
-        game(args.choice, 4, 2, args.d)
+        game(args.choice, 4, 2)
 
-
+    debug = None
     main()
 
 """
