@@ -2,58 +2,56 @@ from copy import deepcopy
 import random as rnd
 
 
-class Peon:
-    def __init__(self, color: str, ordinal: int):
-        self.color = color
-        self.id = color + str(ordinal)
-        self.bord = None
-
-    def set_contacts(self, bord):
-        self.bord = bord
-
-    def __str__(self):
-        return self.id
-
-    def __repr__(self):
-        return self.id
-
-    @property
-    def dir(self):
-        """returns direction as positive or negative unit (int)"""
-        dirdic = {'g': 1, ' ': 0, 'b': -1}
-        try:
-            return dirdic[self.color]
-        except KeyError:
-            return None
-
-    @property
-    def place(self) -> int:
-        return self.bord.place(self.id)
-
-    def dest(self, kind: str):
-        dist = {"jump": 2, "step": 1}[kind]
-        try:
-            dest_id = self.bord[self.place + dist * self.dir]
-            # a place one or two steps to the left or to the right
-            return dest_id
-        except IndexError:
-            return None
-
-    def is_move(self, kind: str) -> bool:
-        """returns boolean value of is it possible for a peon to move one space for step or two for jump"""
-        dest = self.dest(kind)
-        return dest is not None and dest[0] == ' '
-
-
-class EmptySpace(Peon):
-    def __init__(self, ordinal: int):
-        super().__init__(' ', ordinal)
-
-    def is_move(self, _) -> bool:
-        return False
-
-
 class Board:
+    class Peon:
+        def __init__(self, color: str, ordinal: int):
+            self.color = color
+            self.id = color + str(ordinal)
+            self.bord = None
+
+        def set_contacts(self, bord):
+            self.bord = bord
+
+        def __str__(self):
+            return self.id
+
+        def __repr__(self):
+            return self.id
+
+        @property
+        def dir(self):
+            """Returns direction as positive or negative unit (int)"""
+            dirdic = {'g': 1, ' ': 0, 'b': -1}
+            try:
+                return dirdic[self.color]
+            except KeyError:
+                return None
+
+        @property
+        def place(self) -> int:
+            return self.bord.place(self.id)
+
+        def dest(self, kind: str):
+            dist = {"jump": 2, "step": 1}[kind]
+            try:
+                dest_id = self.bord[self.place + dist * self.dir]
+                # a place one or two steps to the left or to the right
+                return dest_id
+            except IndexError:
+                return None
+
+        def is_move(self, kind: str) -> bool:
+            """Returns boolean value of is it possible for a peon to move one space for step or two for jump"""
+            dest = self.dest(kind)
+            return dest is not None and dest[0] == ' '
+
+    class EmptySpace(Peon):
+        def __init__(self, ordinal: int):
+            super().__init__(' ', ordinal)
+
+        def is_move(self, _) -> bool:
+            return False
+
     def __init__(self, peoni: list[Peon]):
         self.order = [p.id for p in peoni]
         self.cntnt = {p.id: p for p in peoni}
@@ -68,8 +66,15 @@ class Board:
         """returns human readable list of unique peons"""
         return str(self.order)
 
+    @staticmethod
+    def opening(nmr_side, nmr_emp):
+        openning = [Board.Peon('g', i) for i in range(nmr_side)]
+        openning.extend([(Board.EmptySpace(i + nmr_side)) for i in range(nmr_emp)])
+        openning.extend([Board.Peon('b', i + nmr_side + nmr_emp) for i in range(nmr_side)])
+        return openning
+
     def place(self, p_id: str) -> int:
-        """retruns the index (int) of a peon on the bord from grey side to black side"""
+        """Retruns the index (int) of a peon on the bord from grey side to black side"""
         return self.order.index(p_id)
 
     def peon_find(self, pid):
@@ -91,10 +96,10 @@ def score(order: list[str]) -> int:
     return back
 
 
-def list_moves(bord: Board) -> list[dict[str:Peon, str:str]]:
-    """returns list of possible moves. each move formated as
+def list_moves(bord: Board) -> list[dict[str, any]]:
+    """Returns list of possible moves. Each move formated as
     a pair of a peon object, a string for kind of move,
-    and an int for the score of the move"""
+    and an int for the score of the move."""
     movi = []
     for p in bord:
         p = bord.peon_find(p)
@@ -106,12 +111,12 @@ def list_moves(bord: Board) -> list[dict[str:Peon, str:str]]:
     return movi
 
 
-# skipping blank peon move listing fixes IndexError in this function in the endgame.
-# it might make prior blank direction hack unnecessary.
+# Skipping blank peon move listing fixes IndexError in this function in the endgame.
+# It might make prior blank direction hack unnecessary.
 
 
 def movi_score(movi: list[dict[str:]], bord: Board, scrfunc) -> list[int]:
-    """take a list of moves without a score and adds a score"""
+    """Take a list of moves without a score and adds a score"""
     scori = []
     for mov in movi:
         consequnce = move(bord, mov)
@@ -135,8 +140,8 @@ def emp_center_scr(consq: list[str]) -> int:
 """
 
 
-def move(bord: Board, mov: dict[str:Peon, str:str]) -> list[str]:
-    """returns a new board object repesenting the state after the move is taken"""
+def move(bord: Board, mov: dict[str, any]) -> list[str]:
+    """Returns a new board object repesenting the state after the move is taken"""
     # deepcopy is used to let us look ahead at future boards without changing the current one
     p, kind = mov["peon"], mov["kind"]
     n_bord = deepcopy(bord.order)
@@ -152,12 +157,9 @@ def winscore(lng, nmr_side):
 
 
 def game(choice_fun, nmr_side=4, nmr_emp=2, dbg=False):
-    openning = [Peon('g', i) for i in range(nmr_side)]
-    openning.extend([(EmptySpace(i + nmr_side)) for i in range(nmr_emp)])
-    openning.extend([Peon('b', i + nmr_side + nmr_emp) for i in range(nmr_side)])
-
-    bord = Board(openning)
-    for p in openning:
+    bord = Board(Board.opening(nmr_side, nmr_emp))
+    for p in bord:
+        p = bord.peon_find(p)
         p.set_contacts(bord)
     print(bord)
     cont = True
@@ -174,11 +176,11 @@ def game(choice_fun, nmr_side=4, nmr_emp=2, dbg=False):
             cont = False
 
 
-def random_choice(movi: list[dict[str:]], _, __) -> dict[str:Peon, str:str]:
+def random_choice(movi: list[dict[str:]], _, __) -> dict[str, any]:
     return rnd.choice(movi)
 
 
-def first_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, str:str]:
+def first_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str, any]:
     if not movi:
         raise IndexError
     scori = movi_score(movi, bord, score)
@@ -187,7 +189,7 @@ def first_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, s
     return back
 
 
-def rand_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, str:str]:
+def rand_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str, any]:
     if not movi:
         raise IndexError
     scori = movi_score(movi, bord, score)
@@ -197,7 +199,7 @@ def rand_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, st
     return back
 
 
-def emp_center_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, str:str]:
+def emp_center_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str, any]:
     if not movi:
         raise IndexError
     scori = movi_score(movi, bord, emp_center_scr)
@@ -207,7 +209,7 @@ def emp_center_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, 
     return back
 
 
-def center_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, str:str]:
+def center_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str, any]:
     if not movi:
         raise IndexError
     maxi = movi_score(movi, bord, score)
@@ -220,7 +222,7 @@ def center_max_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, 
     return back
 
 
-def max_center_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, str:str]:
+def max_center_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str, any]:
     if not movi:
         raise IndexError
     maxi = movi_score(movi, bord, score)
@@ -238,7 +240,7 @@ def max_center_choice(movi: list[dict[str:]], bord: Board, _) -> dict[str:Peon, 
 """
 
 
-def interactive_choice(movi: list[dict[str:]], bord: Board) -> dict[str:Peon, str:str]:
+def interactive_choice(movi: list[dict[str:]], bord: Board) -> dict[str, any]:
     if not movi:
         raise IndexError
     hlp = \
