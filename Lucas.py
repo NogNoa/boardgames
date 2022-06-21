@@ -6,35 +6,41 @@ class Peon:
     def __init__(self, color: str, ordinal: int):
         self.color = color
         self.id = color + str(ordinal)
-        self.dir = self.dir()
-        self.bord = None
-
-    def set_contacts(self, bord):
-        self.bord = bord if not self.bord else self.bord
-        # safety by first board wins
+        self.dir = self.dir(color)
+        self._bord = None
 
     def __str__(self):
         return self.id
 
     def __repr__(self):
         return self.id
+    
+    @property
+    def bord(self):
+        return self._bord
+        
+    @bord.setter
+    def bord(self, bord):
+        self._bord = bord if not self._bord else self._bord
+        # safety by first board wins
 
-    def dir(self):
+    @staticmethod
+    def dir(color):
         """Returns direction as positive or negative unit (int)"""
-        return {'g': 1, ' ': 0, 'b': -1}[self.color]
+        return {'g': 1, ' ': 0, 'b': -1}[color]
 
     @property
     def place(self) -> int:
-        return self.bord.place(self.id)
+        return self._bord.place(self.id)
 
     def dest(self, kind: str):
         dist = {"jump": 2, "step": 1}[kind]
         dest_ind = self.place + dist * self.dir
         # a place one or two steps to the left or to the right.
-        if not 0 <= dest_ind < len(self.bord):
+        if not 0 <= dest_ind < len(self._bord):
             return None
         else:
-            return self.bord[dest_ind]
+            return self._bord[dest_ind]
 
     def is_move(self, kind: str) -> bool:
         """Returns boolean value of is it possible for a peon to move one space for a step or two for a jump."""
@@ -46,7 +52,7 @@ class EmptySpace(Peon):
     def __init__(self, ordinal: int):
         super().__init__(' ', ordinal)
 
-    @static
+    @staticmethod
     def is_move(*args) -> bool:
         return False
 
@@ -56,7 +62,7 @@ class Board:
         self.order = [p.id for p in peoni]
         self.cntnt = {p.id: p for p in peoni}
         for p in peoni:
-            p.set_contacts(self)
+            p.bord = self
 
     def __getitem__(self, i: int) -> str:
         return self.order[i]
