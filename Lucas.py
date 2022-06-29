@@ -68,6 +68,34 @@ class Board:
         except KeyError:
             return None
 
+    def list_moves(self) -> list[dict[str, any]]:
+        """Returns list of possible moves. Each move formated as
+        a pair of a peon object, a string for kind of move,
+        and an int for the score of the move."""
+        movi = []
+        for p in self:
+            p = self.peon_find(p)
+            if p.color == ' ':
+                continue
+            for k in {"step", "jump"}:
+                if p.is_move(k):
+                    movi.append({'peon': p, 'kind': k})
+        return movi
+
+    # Skipping blank peon move listing fixes IndexError in this function in the endgame.
+    # It might make prior blank direction hack unnecessary.
+
+    def after_move(self, mov: dict[str, any]) -> list[str]:
+        """Returns a new board object repesenting the state after the move is taken"""
+        # deepcopy is used to let us look ahead at future boards without changing the current one
+        p, kind = mov["peon"], mov["kind"]
+        n_bord = deepcopy(self.order)
+        place = self.order.index(p.id)
+        emp = self.peon_find(p.dest(kind))
+        n_bord[emp.place] = p.id
+        n_bord[place] = emp.id
+        return n_bord
+
 
 def score(order: list[str]) -> int:
     back = 0
@@ -81,30 +109,11 @@ def score(order: list[str]) -> int:
     return back
 
 
-def list_moves(bord: Board) -> list[dict[str, any]]:
-    """Returns list of possible moves. Each move formated as
-    a pair of a peon object, a string for kind of move,
-    and an int for the score of the move."""
-    movi = []
-    for p in bord:
-        p = bord.peon_find(p)
-        if p.color == ' ':
-            continue
-        for k in {"step", "jump"}:
-            if p.is_move(k):
-                movi.append({'peon': p, 'kind': k})
-    return movi
-
-
-# Skipping blank peon move listing fixes IndexError in this function in the endgame.
-# It might make prior blank direction hack unnecessary.
-
-
 def movi_score(movi: list[dict[str:]], bord: Board, scrfunc) -> list[int]:
     """Take a list of moves without a score and adds a score"""
     scori = []
     for mov in movi:
-        consequnce = move(bord, mov)
+        consequnce = bord.after_move(mov)
         scr = scrfunc(consequnce)
         scori.append(scr)
     return scori
@@ -125,18 +134,6 @@ def emp_center_scr(consq: list[str]) -> int:
 """
 
 
-def move(bord: Board, mov: dict[str, any]) -> list[str]:
-    """Returns a new board object repesenting the state after the move is taken"""
-    # deepcopy is used to let us look ahead at future boards without changing the current one
-    p, kind = mov["peon"], mov["kind"]
-    n_bord = deepcopy(bord.order)
-    place = bord.order.index(p.id)
-    emp = bord.peon_find(p.dest(kind))
-    n_bord[emp.place] = p.id
-    n_bord[place] = emp.id
-    return n_bord
-
-
 def winscore(lng, nmr_side):
     return (lng * 2 - nmr_side - 1) * nmr_side
 
@@ -146,10 +143,10 @@ def game(choice_fun, nmr_side=4, nmr_emp=2):
     print(bord)
     cont = True
     while cont:
-        movi = list_moves(bord)
+        movi = bord.list_moves()
         try:
             ch = eval(f"{choice_fun}_choice(movi, bord)")
-            bord.order = move(bord, ch)
+            bord.order = bord.after_move(ch)
             print(bord)
             if debug: print(score(bord.order))
         except IndexError:
@@ -278,6 +275,7 @@ if __name__ == "__main__":
             print("please enter a valid decision algorithm:\n\t", str(choices)[1:-1])
             exit(0)
         game(args.choice, 4, 2)
+
 
     debug = None
     main()
