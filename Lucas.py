@@ -4,28 +4,17 @@ import random as rnd
 
 class Board:
     class Peon:
-        def __init__(self, color: str, ordinal: int):
+        def __init__(self, color: str, ordinal: int, bord):
             self.color = color
             self.id = color + str(ordinal)
-            self.bord = None
-
-        def set_contacts(self, bord):
             self.bord = bord
+            self.dir = {'g': 1, ' ': 0, 'b': -1}[color]
 
         def __str__(self):
             return self.id
 
         def __repr__(self):
             return self.id
-
-        @property
-        def dir(self):
-            """Returns direction as positive or negative unit (int)"""
-            dirdic = {'g': 1, ' ': 0, 'b': -1}
-            try:
-                return dirdic[self.color]
-            except KeyError:
-                return None
 
         @property
         def place(self) -> int:
@@ -53,13 +42,11 @@ class Board:
             return False
 
     def __init__(self, nmr_side, nmr_emp):
-        peoni = [Board.Peon('g', i) for i in range(nmr_side)]
+        peoni = [Board.Peon('g', i, self) for i in range(nmr_side)]
         peoni.extend([(Board.EmptySpace(i + nmr_side)) for i in range(nmr_emp)])
-        peoni.extend([Board.Peon('b', i + nmr_side + nmr_emp) for i in range(nmr_side)])
+        peoni.extend([Board.Peon('b', i + nmr_side + nmr_emp, self) for i in range(nmr_side)])
         self.order = [p.id for p in peoni]
         self.cntnt = {p.id: p for p in peoni}
-        for p in peoni:
-            p.set_contacts(self)
 
     def __getitem__(self, i: int) -> str:
         return self.order[i]
