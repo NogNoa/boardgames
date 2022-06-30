@@ -1,3 +1,4 @@
+import typing
 from copy import deepcopy
 import random as rnd
 
@@ -35,15 +36,15 @@ class Board:
             return dest is not None and dest[0] == ' '
 
     class EmptySpace(Peon):
-        def __init__(self, ordinal: int):
-            super().__init__(' ', ordinal)
+        def __init__(self, ordinal: int, bord):
+            super().__init__(' ', ordinal, bord)
 
         def is_move(self, _) -> bool:
             return False
 
     def __init__(self, nmr_side, nmr_emp):
         peoni = [Board.Peon('g', i, self) for i in range(nmr_side)]
-        peoni.extend([(Board.EmptySpace(i + nmr_side)) for i in range(nmr_emp)])
+        peoni.extend([(Board.EmptySpace(i + nmr_side, self)) for i in range(nmr_emp)])
         peoni.extend([Board.Peon('b', i + nmr_side + nmr_emp, self) for i in range(nmr_side)])
         self.order = [p.id for p in peoni]
         self.cntnt = {p.id: p for p in peoni}
@@ -86,15 +87,16 @@ class Board:
     # It might make prior blank direction hack unnecessary.
 
     def after_move(self, mov: dict[str, any]) -> list[str]:
-        """Returns a new board object repesenting the state after the move is taken"""
+        """Returns a new board order repesenting the state after the move is taken"""
         # deepcopy is used to let us look ahead at future boards without changing the current one
         p, kind = mov["peon"], mov["kind"]
         n_bord = deepcopy(self.order)
-        place = self.order.index(p.id)
         emp = self.peon_find(p.dest(kind))
         n_bord[emp.place] = p.id
-        n_bord[place] = emp.id
+        n_bord[p.place] = emp.id
         return n_bord
+
+
 
 
 def score(order: list[str]) -> int:
@@ -109,7 +111,7 @@ def score(order: list[str]) -> int:
     return back
 
 
-def movi_score(movi: list[dict[str:]], bord: Board, scrfunc) -> list[int]:
+def movi_score(movi: list[dict[str:]], bord: Board, scrfunc: typing.Callable) -> list[int]:
     """Take a list of moves without a score and adds a score"""
     scori = []
     for mov in movi:
@@ -145,7 +147,7 @@ def game(choice_fun, nmr_side=4, nmr_emp=2):
     while cont:
         movi = bord.list_moves()
         try:
-            ch = eval(f"{choice_fun}_choice(movi, bord)")
+            ch = eval(f"{choice_fun}_choice")(movi, bord)
             bord.order = bord.after_move(ch)
             print(bord)
             if debug: print(score(bord.order))
@@ -295,8 +297,13 @@ over the two grey peons.
 But we don't necessarily need to add them to the AI
 """
 
-# todo: either incorporate content into board or make it just be a plain list.
-#  the interactive function is conditioned wrong. rethink.
+# todo:
 #  make generic choice function, that accept score functions, and random.
 #   obviously doesn't include interactive choice
-#  make empty peon less object and regular more?
+
+# Done:
+#  Either incorporate content into board or make it just be a plain list.
+#  The interactive function is conditioned wrong. Rethink.
+
+# N/A
+# make empty peon less object and regular more?
