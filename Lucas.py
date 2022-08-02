@@ -85,7 +85,7 @@ class Board:
             return None
 
     def move(self, mov: dict[str:Peon, str:str]) -> list[str]:
-        """Returns a new board object repesenting the state after the move is taken."""
+        """Returns a new order repesenting the state after the move is taken."""
         # deepcopy is used to let us look ahead at future boards without changing the current one.
         p, kind = mov["peon"], mov["kind"]
         n_order = deepcopy(self.order)
@@ -96,8 +96,7 @@ class Board:
 
     def list_moves(self) -> list[dict[str:Peon, str:str]]:
         """Returns list of possible moves. Each move formated as
-        a pair of a peon object, a string for the kind of move,
-        and an int for the score of the move."""
+        a pair of a peon object, and a string for the kind of move."""
         movi = []
         for p in self:
             p = self.peon_find(p)
