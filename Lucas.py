@@ -1,6 +1,8 @@
 from copy import deepcopy
 import random as rnd
 
+from typing import Tuple, Dict
+
 
 class Peon:
     def __init__(self, color: str, ordinal: int):
@@ -14,11 +16,11 @@ class Peon:
 
     def __repr__(self):
         return self.id
-    
+
     @property
     def bord(self):
         return self._bord
-        
+
     @bord.setter
     def bord(self, bord):
         self._bord = bord if not self._bord else self._bord
@@ -53,7 +55,7 @@ class EmptySpace(Peon):
         super().__init__(' ', ordinal)
 
     @staticmethod
-    def is_move(*args) -> bool:
+    def is_move(*_) -> bool:
         return False
 
 
@@ -84,7 +86,7 @@ class Board:
         except KeyError:
             return None
 
-    def move(self, mov: dict[str:Peon, str:str]) -> list[str]:
+    def move(self, mov: Dict[str, any]) -> list[str]:
         """Returns a new order repesenting the state after the move is taken."""
         # deepcopy is used to let us look ahead at future boards without changing the current one.
         p, kind = mov["peon"], mov["kind"]
@@ -94,7 +96,7 @@ class Board:
         n_order[p.place] = emp.id
         return n_order
 
-    def list_moves(self) -> list[dict[str:Peon, str:str]]:
+    def list_moves(self) -> list[Dict[str, any]]:
         """Returns list of possible moves. Each move formated as
         a pair of a peon object, and a string for the kind of move."""
         movi = []
@@ -124,7 +126,7 @@ def score(order: list[str]) -> int:
 # It might make prior blank direction hack unnecessary.
 
 
-def movi_score(movi: list[dict[str:]], bord: Board, scrfunc) -> list[int]:
+def movi_score(movi: list[Dict[str, any]], bord: Board, scrfunc) -> list[int]:
     """Take a list of moves without a score and adds a score."""
     scori = []
     for mov in movi:
@@ -141,12 +143,6 @@ def emp_center_scr(consq: list[str]) -> int:
         if p[0] == ' ':
             scr += cntr - abs(cntr - i)
     return scr
-
-
-"""def movi_count(consq: list[str], pf: Content) -> int:
-    movi = list_moves(Board(consq), pf)
-    return len(movi)
-"""
 
 
 def winscore(lng, nmr_side):
@@ -178,12 +174,25 @@ def game(choice_fun="interactive", nmr_side=4, nmr_emp=2, dbg=False):
             break
 
 
-def random_choice(movi: list[dict[str:]]) -> dict[[str, Peon], [str, str]]:
+def choice_find(*choice_argi: Tuple[str]):
+    if len(choice_argi) == 1:
+        if choice_argi[0] == "interactive":
+            return interactive_choice
+        elif choice_argi[0] == "random":
+            return random_choice
+        else:
+            scr_fun = eval(f"{choice_argi[0]}_scr")
+            return single_pref_choice
+    else:
+        return two_pref_choice
+
+
+def random_choice(movi: list[Dict[str, any]]) -> Dict[str, any]:
     return rnd.choice(movi)
 
 
 def choice(ch_fun):
-    def general_choice(movi, *args, **kwargs) -> dict[[str, Peon], [str, str]]:
+    def general_choice(movi, *args, **kwargs) -> Dict[str, any]:
         if not movi:
             raise NoMoveError
         besti = ch_fun(movi, *args, **kwargs)
@@ -193,7 +202,7 @@ def choice(ch_fun):
     return general_choice
 
 
-def first_max_choice(movi: list[dict[str:]], bord: Board, scr_fun=score) -> dict[[str, Peon], [str, str]]:
+def first_max_choice(movi: list[Dict[str, any]], bord: Board, scr_fun=score) -> Dict[str, any]:
     if not movi:
         raise NoMoveError
     scori = movi_score(movi, bord, scr_fun)
@@ -203,14 +212,14 @@ def first_max_choice(movi: list[dict[str:]], bord: Board, scr_fun=score) -> dict
 
 
 @choice
-def single_pref_choice(movi: list[dict[str:]], bord: Board, scr_fun) -> list[int]:
+def single_pref_choice(movi: list[Dict[str, any]], bord: Board, scr_fun) -> list[int]:
     scori = movi_score(movi, bord, scr_fun)
     best = max(scori)
     return [pl for pl, scr in enumerate(scori) if scr == best]
 
 
 @choice
-def two_pref_choice(movi: list[dict[str:]], bord: Board, scr_fun_1, scr_fun_2) -> list[int]:
+def two_pref_choice(movi: list[Dict[str, any]], bord: Board, scr_fun_1, scr_fun_2) -> list[int]:
     scori_1 = movi_score(movi, bord, scr_fun_1)
     scori_2 = movi_score(movi, bord, scr_fun_2)
     max_1 = max(scori_1)
@@ -219,12 +228,12 @@ def two_pref_choice(movi: list[dict[str:]], bord: Board, scr_fun_1, scr_fun_2) -
     return [pl for pl, scr in enumerate(besti) if scr == best_of_both]
 
 
-"""def keep_options_choice(movi: list[dict], bord: Board, pf: Content) -> dict:
+"""def keep_options_choice(movi: list[Dict], bord: Board, pf: Content) -> Dict:
     scori = movi_score(movi, bord, movi_count)
 """
 
 
-def interactive_choice(movi: list[dict[str:]], bord: Board) -> dict[[str, Peon], [str, str]]:
+def interactive_choice(movi: list[Dict[str, any]], bord: Board) -> Dict[str, any]:
     if not movi:
         raise NoMoveError
     hlp = \
@@ -295,9 +304,9 @@ But we don't necessarily need to add them to the AI.
 """
 
 # todo:
-#  obviously doesn't include interactive choice
 #  make empty peon less object and regular more?
 #  generic choice functions (glue code)
 
 # don't:
 # make generic choice function, that accept score functions, and random.
+# obviously doesn't include interactive choice.
