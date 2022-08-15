@@ -75,9 +75,9 @@ class Board:
         # deepcopy is used to let us look ahead at future boards without changing the current one.
         p, kind = mov["peon"], mov["kind"]
         n_order = deepcopy(self.order)
-        emp = self.peon_find(p.dest(self, kind))
-        n_order[emp.place(self)] = p.id
-        n_order[p.place(self)] = emp.id
+        emp = self.peon_find(self.dest(p, kind))
+        n_order[self.place(emp.id)] = p.id
+        n_order[self.place(p.id)] = emp.id
         return n_order
 
     def list_moves(self) -> list[Dict[str, any]]:
@@ -89,7 +89,7 @@ class Board:
             if p.color == ' ':
                 continue
             for k in {"step", "jump"}:
-                if p.is_move(k):
+                if self.is_move(p, k):
                     movi.append({'peon': p, 'kind': k})
         return movi
 
