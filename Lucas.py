@@ -22,32 +22,10 @@ class Peon:
         """Returns direction as positive or negative unit (int)"""
         return {'g': 1, ' ': 0, 'b': -1}[color]
 
-    def place(self, bord) -> int:
-        return bord.place(self.id)
-
-    def dest(self, bord, kind: str):
-        "Returns an empty place in which the peon can land"
-        dist = {"jump": 2, "step": 1}[kind]
-        dest_ind = self.place(bord) + dist * self.dir
-        # a place one or two steps to the left or to the right.
-        if not 0 <= dest_ind < len(bord):
-            return None
-        else:
-            return bord[dest_ind]
-
-    def is_move(self, bord, kind: str) -> bool:
-        """Returns whether it's possible for a peon to move one space for a step or two for a jump."""
-        dest = self.dest(bord, kind)
-        return dest is not None and dest[0] == ' '
-
 
 class EmptySpace(Peon):
     def __init__(self, ordinal: int):
         super().__init__(' ', ordinal)
-
-    @staticmethod
-    def is_move(*_) -> bool:
-        return False
 
 
 class Board:
@@ -74,6 +52,23 @@ class Board:
             return self.cntnt[pid]
         except KeyError:
             return None
+
+    def dest(self, peon: Peon, kind: str):
+        """Returns an empty place in which the peon can land"""
+        dist = {"jump": 2, "step": 1}[kind]
+        dest_ind = self.place(peon.id) + dist * peon.dir
+        # a place one or two steps to the left or to the right.
+        if not 0 <= dest_ind < len(self):
+            return None
+        else:
+            return self[dest_ind]
+
+    def is_move(self, peon: Peon, kind: str) -> bool:
+        """Returns whether it's possible for a peon to move one space for a step or two for a jump."""
+        if peon.color == " ": return False
+
+        dest = self.dest(peon, kind)
+        return dest is not None and dest[0] == ' '
 
     def move(self, mov: Dict[str, any]) -> list[str]:
         """Returns a new order repesenting the state after the move is taken."""
