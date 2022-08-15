@@ -1,7 +1,7 @@
 from copy import deepcopy
 import random as rnd
 
-from typing import Tuple, Dict
+from typing import Tuple, Dict, List
 
 
 class Peon:
@@ -21,6 +21,10 @@ class Peon:
     def dir(color):
         """Returns direction as positive or negative unit (int)"""
         return {'g': 1, ' ': 0, 'b': -1}[color]
+
+    def place(self, order: List) -> int:
+        """Retruns the index (int) of a peon on the bord from grey side to black side."""
+        return order.index(self.id)
 
 
 class EmptySpace(Peon):
@@ -43,10 +47,6 @@ class Board:
         """Returns human readable list of unique peons"""
         return str(self.order)
 
-    def place(self, p_id: str) -> int:
-        """Retruns the index (int) of a peon on the bord from grey side to black side."""
-        return self.order.index(p_id)
-
     def peon_find(self, pid):
         try:
             return self.cntnt[pid]
@@ -56,7 +56,7 @@ class Board:
     def dest(self, peon: Peon, kind: str):
         """Returns an empty place in which the peon can land"""
         dist = {"jump": 2, "step": 1}[kind]
-        dest_ind = self.place(peon.id) + dist * peon.dir
+        dest_ind = peon.place(self.order) + dist * peon.dir
         # a place one or two steps to the left or to the right.
         if not 0 <= dest_ind < len(self):
             return None
@@ -76,8 +76,8 @@ class Board:
         p, kind = mov["peon"], mov["kind"]
         n_order = deepcopy(self.order)
         emp = self.peon_find(self.dest(p, kind))
-        n_order[self.place(emp.id)] = p.id
-        n_order[self.place(p.id)] = emp.id
+        n_order[emp.place(self.order)] = p.id
+        n_order[p.place(self.order)] = emp.id
         return n_order
 
     def list_moves(self) -> list[Dict[str, any]]:
