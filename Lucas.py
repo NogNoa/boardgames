@@ -17,36 +17,27 @@ class Peon:
     def __repr__(self):
         return self.id
 
-    @property
-    def bord(self):
-        return self._bord
-
-    @bord.setter
-    def bord(self, bord):
-        self._bord = bord if not self._bord else self._bord
-        # safety by first board wins
-
     @staticmethod
     def dir(color):
         """Returns direction as positive or negative unit (int)"""
         return {'g': 1, ' ': 0, 'b': -1}[color]
 
-    @property
-    def place(self) -> int:
-        return self._bord.place(self.id)
+    def place(self, bord) -> int:
+        return bord.place(self.id)
 
-    def dest(self, kind: str):
+    def dest(self, bord, kind: str):
+        "Returns an empty place in which the peon can land"
         dist = {"jump": 2, "step": 1}[kind]
-        dest_ind = self.place + dist * self.dir
+        dest_ind = self.place(bord) + dist * self.dir
         # a place one or two steps to the left or to the right.
-        if not 0 <= dest_ind < len(self._bord):
+        if not 0 <= dest_ind < len(bord):
             return None
         else:
-            return self._bord[dest_ind]
+            return bord[dest_ind]
 
-    def is_move(self, kind: str) -> bool:
-        """Returns boolean value of is it possible for a peon to move one space for a step or two for a jump."""
-        dest = self.dest(kind)
+    def is_move(self, bord, kind: str) -> bool:
+        """Returns whether it's possible for a peon to move one space for a step or two for a jump."""
+        dest = self.dest(bord, kind)
         return dest is not None and dest[0] == ' '
 
 
@@ -63,8 +54,6 @@ class Board:
     def __init__(self, peoni: list[Peon]):
         self.order = [p.id for p in peoni]
         self.cntnt = {p.id: p for p in peoni}
-        for p in peoni:
-            p.bord = self
 
     def __getitem__(self, i: int) -> str:
         return self.order[i]
@@ -91,9 +80,9 @@ class Board:
         # deepcopy is used to let us look ahead at future boards without changing the current one.
         p, kind = mov["peon"], mov["kind"]
         n_order = deepcopy(self.order)
-        emp = self.peon_find(p.dest(kind))
-        n_order[emp.place] = p.id
-        n_order[p.place] = emp.id
+        emp = self.peon_find(p.dest(self, kind))
+        n_order[emp.place(self)] = p.id
+        n_order[p.place(self)] = emp.id
         return n_order
 
     def list_moves(self) -> list[Dict[str, any]]:
