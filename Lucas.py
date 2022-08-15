@@ -26,10 +26,31 @@ class Peon:
         """Retruns the index (int) of a peon on the bord from grey side to black side."""
         return order.index(self.id)
 
+    def dest(self, order: List, kind: str):
+        """Returns an empty place in which the peon can land"""
+        dist = {"jump": 2, "step": 1}[kind]
+        dest_ind = self.place(order) + dist * self.dir
+        # a place one or two steps to the left or to the right.
+        if not 0 <= dest_ind < len(order):
+            return None
+        else:
+            return order[dest_ind]
+
+    def is_move(self, order: List, kind: str) -> bool:
+        """Returns whether it's possible for a peon to move one space for a step or two for a jump."""
+        dest = self.dest(order, kind)
+        return dest is not None and dest[0] == ' '
+
 
 class EmptySpace(Peon):
     def __init__(self, ordinal: int):
         super().__init__(' ', ordinal)
+
+    def is_move(*_) -> bool:
+        return False
+
+    def dest(*_):
+        return None
 
 
 class Board:
@@ -53,29 +74,12 @@ class Board:
         except KeyError:
             return None
 
-    def dest(self, peon: Peon, kind: str):
-        """Returns an empty place in which the peon can land"""
-        dist = {"jump": 2, "step": 1}[kind]
-        dest_ind = peon.place(self.order) + dist * peon.dir
-        # a place one or two steps to the left or to the right.
-        if not 0 <= dest_ind < len(self):
-            return None
-        else:
-            return self[dest_ind]
-
-    def is_move(self, peon: Peon, kind: str) -> bool:
-        """Returns whether it's possible for a peon to move one space for a step or two for a jump."""
-        if peon.color == " ": return False
-
-        dest = self.dest(peon, kind)
-        return dest is not None and dest[0] == ' '
-
     def move(self, mov: Dict[str, any]) -> list[str]:
         """Returns a new order repesenting the state after the move is taken."""
         # deepcopy is used to let us look ahead at future boards without changing the current one.
         p, kind = mov["peon"], mov["kind"]
         n_order = deepcopy(self.order)
-        emp = self.peon_find(self.dest(p, kind))
+        emp = self.peon_find(p.dest(self.order, kind))
         n_order[emp.place(self.order)] = p.id
         n_order[p.place(self.order)] = emp.id
         return n_order
@@ -89,7 +93,7 @@ class Board:
             if p.color == ' ':
                 continue
             for k in {"step", "jump"}:
-                if self.is_move(p, k):
+                if p.is_move(self.order, k):
                     movi.append({'peon': p, 'kind': k})
         return movi
 
