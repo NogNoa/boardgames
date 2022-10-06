@@ -9,7 +9,6 @@ class Peon:
         self.color = color
         self.id = color + str(ordinal)
         self.dir = self.dir(color)
-        self._bord = None
 
     def __str__(self):
         return self.id
