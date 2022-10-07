@@ -42,7 +42,7 @@ class Peon:
 
 
 class EmptySpace(Peon):
-    def __init__(self, ordinal: int, bord):
+    def __init__(self, ordinal: int):
         super().__init__(' ', ordinal)
 
     @staticmethod
@@ -57,7 +57,7 @@ class EmptySpace(Peon):
 class Board:
     def __init__(self, nmr_side, nmr_emp):
         peoni = [Peon('g', i) for i in range(nmr_side)]
-        peoni.extend([(EmptySpace(i + nmr_side, self)) for i in range(nmr_emp)])
+        peoni.extend([(EmptySpace(i + nmr_side)) for i in range(nmr_emp)])
         peoni.extend([Peon('b', i + nmr_side + nmr_emp) for i in range(nmr_side)])
         self.order = [p.id for p in peoni]
         self.cntnt = {p.id: p for p in peoni}
