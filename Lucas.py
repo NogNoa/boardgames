@@ -1,15 +1,14 @@
 from copy import deepcopy
 import random as rnd
 
-from typing import Tuple, Dict, Callable
+from typing import Tuple, Dict, List, Callable
 
 
 class Peon:
-    def __init__(self, color: str, ordinal: int, bord):
+    def __init__(self, color: str, ordinal: int):
         self.color = color
         self.id = color + str(ordinal)
         self.dir = self.dir(color)
-        self._bord = bord
 
     def __str__(self):
         return self.id
@@ -22,39 +21,44 @@ class Peon:
         """Returns direction as positive or negative unit (int)"""
         return {'g': 1, ' ': 0, 'b': -1}[color]
 
-    @property
-    def place(self) -> int:
-        return self._bord.place(self.id)
+    def place(self, order: List) -> int:
+        """Retruns the index (int) of a peon on the bord from grey side to black side."""
+        return order.index(self.id)
 
-    def dest(self, kind: str):
+    def dest(self, order: List, kind: str):
+        """Returns an empty place in which the peon can land"""
         dist = {"jump": 2, "step": 1}[kind]
-        dest_ind = self.place + dist * self.dir
+        dest_ind = self.place(order) + dist * self.dir
         # a place one or two steps to the left or to the right.
-        if not 0 <= dest_ind < len(self._bord):
+        if not 0 <= dest_ind < len(order):
             return None
         else:
-            return self._bord[dest_ind]
+            return order[dest_ind]
 
-    def is_move(self, kind: str) -> bool:
-        """Returns boolean value of is it possible for a peon to move one space for a step or two for a jump."""
-        dest = self.dest(kind)
+    def is_move(self, order: List, kind: str) -> bool:
+        """Returns whether it's possible for a peon to move one space for a step or two for a jump."""
+        dest = self.dest(order, kind)
         return dest is not None and dest[0] == ' '
 
 
 class EmptySpace(Peon):
     def __init__(self, ordinal: int, bord):
-        super().__init__(' ', ordinal, bord)
+        super().__init__(' ', ordinal)
 
     @staticmethod
     def is_move(*_) -> bool:
         return False
 
+    @staticmethod
+    def dest(*_):
+        return None
+
 
 class Board:
     def __init__(self, nmr_side, nmr_emp):
-        peoni = [Peon('g', i, self) for i in range(nmr_side)]
+        peoni = [Peon('g', i) for i in range(nmr_side)]
         peoni.extend([(EmptySpace(i + nmr_side, self)) for i in range(nmr_emp)])
-        peoni.extend([Peon('b', i + nmr_side + nmr_emp, self) for i in range(nmr_side)])
+        peoni.extend([Peon('b', i + nmr_side + nmr_emp) for i in range(nmr_side)])
         self.order = [p.id for p in peoni]
         self.cntnt = {p.id: p for p in peoni}
 
@@ -68,36 +72,32 @@ class Board:
         """Returns human readable list of unique peons"""
         return str(self.order)
 
-    def place(self, p_id: str) -> int:
-        """Retruns the index (int) of a peon on the bord from grey side to black side."""
-        return self.order.index(p_id)
-
     def peon_find(self, pid):
         try:
             return self.cntnt[pid]
         except KeyError:
             return None
 
-    def after_move(self, mov: Dict[str:Peon, str:str]) -> list[str]:
-        """returns a new board order repesenting the state after the move is taken"""
-        # deepcopy is used to let us look ahead at future boards without changing the current one
+    def after_move(self, mov: Dict[str, any]) -> list[str]:
+        """Returns a new board order repesenting the state after the move is taken."""
+        # deepcopy is used to let us look ahead at future boards without changing the current one.
         p, kind = mov["peon"], mov["kind"]
         n_order = deepcopy(self.order)
-        emp = self.peon_find(p.dest(kind))
-        n_order[emp.place] = p.id
-        n_order[p.place] = emp.id
+        emp = self.peon_find(p.dest(self.order, kind))
+        n_order[emp.place(self.order)] = p.id
+        n_order[p.place(self.order)] = emp.id
         return n_order
 
-    def list_moves(self) -> list[Dict[str:Peon, str:str]]:
-        """Returns list of possible moves. each move formated as
-        a pair of a peon objects, and a string for the kind of move."""
+    def list_moves(self) -> list[Dict[str, any]]:
+        """Returns list of possible moves. Each move formated as
+        a pair of peon objects, and a string for the kind of move."""
         movi = []
         for p in self:
             p = self.peon_find(p)
             if p.color == ' ':
                 continue
             for k in {"step", "jump"}:
-                if p.is_move(k):
+                if p.is_move(self.order, k):
                     movi.append({'peon': p, 'kind': k})
         return movi
 
@@ -117,8 +117,8 @@ def score(order: list[str]) -> int:
     return back
 
 
-def movi_score(movi: list[dict[str:]], bord: Board, scrfunc: Callable) -> list[int]:
-    """Take a list of moves without a score and adds a score"""
+def movi_score(movi: list[Dict[str, any]], bord: Board, scrfunc: Callable) -> list[int]:
+    """Take a list of moves without a score and adds a score."""
     scori = []
     for mov in movi:
         consequnce = bord.after_move(mov)
