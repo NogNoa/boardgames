@@ -3,49 +3,51 @@ from copy import deepcopy
 import random as rnd
 
 
+class Peon:
+    def __init__(self, color: str, ordinal: int, bord):
+        self.color = color
+        self.id = color + str(ordinal)
+        self.bord = bord
+        self.dir = {'g': 1, ' ': 0, 'b': -1}[color]
+
+    def __str__(self):
+        return self.id
+
+    def __repr__(self):
+        return self.id
+
+    @property
+    def place(self) -> int:
+        return self.bord.place(self.id)
+
+    def dest(self, kind: str):
+        dist = {"jump": 2, "step": 1}[kind]
+        try:
+            dest_id = self.bord[self.place + dist * self.dir]
+            # a place one or two steps to the left or to the right
+            return dest_id
+        except IndexError:
+            return None
+
+    def is_move(self, kind: str) -> bool:
+        """Returns boolean value of is it possible for a peon to move one space for step or two for jump"""
+        dest = self.dest(kind)
+        return dest is not None and dest[0] == ' '
+
+
+class EmptySpace(Peon):
+    def __init__(self, ordinal: int, bord):
+        super().__init__(' ', ordinal, bord)
+
+    def is_move(self, _) -> bool:
+        return False
+
+
 class Board:
-    class Peon:
-        def __init__(self, color: str, ordinal: int, bord):
-            self.color = color
-            self.id = color + str(ordinal)
-            self.bord = bord
-            self.dir = {'g': 1, ' ': 0, 'b': -1}[color]
-
-        def __str__(self):
-            return self.id
-
-        def __repr__(self):
-            return self.id
-
-        @property
-        def place(self) -> int:
-            return self.bord.place(self.id)
-
-        def dest(self, kind: str):
-            dist = {"jump": 2, "step": 1}[kind]
-            try:
-                dest_id = self.bord[self.place + dist * self.dir]
-                # a place one or two steps to the left or to the right
-                return dest_id
-            except IndexError:
-                return None
-
-        def is_move(self, kind: str) -> bool:
-            """Returns boolean value of is it possible for a peon to move one space for step or two for jump"""
-            dest = self.dest(kind)
-            return dest is not None and dest[0] == ' '
-
-    class EmptySpace(Peon):
-        def __init__(self, ordinal: int, bord):
-            super().__init__(' ', ordinal, bord)
-
-        def is_move(self, _) -> bool:
-            return False
-
     def __init__(self, nmr_side, nmr_emp):
-        peoni = [Board.Peon('g', i, self) for i in range(nmr_side)]
-        peoni.extend([(Board.EmptySpace(i + nmr_side, self)) for i in range(nmr_emp)])
-        peoni.extend([Board.Peon('b', i + nmr_side + nmr_emp, self) for i in range(nmr_side)])
+        peoni = [Peon('g', i, self) for i in range(nmr_side)]
+        peoni.extend([(EmptySpace(i + nmr_side, self)) for i in range(nmr_emp)])
+        peoni.extend([Peon('b', i + nmr_side + nmr_emp, self) for i in range(nmr_side)])
         self.order = [p.id for p in peoni]
         self.cntnt = {p.id: p for p in peoni}
 
@@ -95,8 +97,6 @@ class Board:
         n_bord[emp.place] = p.id
         n_bord[p.place] = emp.id
         return n_bord
-
-
 
 
 def score(order: list[str]) -> int:
