@@ -7,8 +7,8 @@ class Peon:
     def __init__(self, color: str, ordinal: int, bord):
         self.color = color
         self.id = color + str(ordinal)
-        self.bord = bord
         self.dir = {'g': 1, ' ': 0, 'b': -1}[color]
+        self.bord = bord
 
     def __str__(self):
         return self.id
@@ -71,6 +71,16 @@ class Board:
         except KeyError:
             return None
 
+    def after_move(self, mov: dict[str, any]) -> list[str]:
+        """Returns a new board order repesenting the state after the move is taken"""
+        # deepcopy is used to let us look ahead at future boards without changing the current one
+        p, kind = mov["peon"], mov["kind"]
+        n_bord = deepcopy(self.order)
+        emp = self.peon_find(p.dest(kind))
+        n_bord[emp.place] = p.id
+        n_bord[p.place] = emp.id
+        return n_bord
+
     def list_moves(self) -> list[dict[str, any]]:
         """Returns list of possible moves. Each move formated as
         a pair of a peon object, a string for kind of move,
@@ -87,16 +97,6 @@ class Board:
 
     # Skipping blank peon move listing fixes IndexError in this function in the endgame.
     # It might make prior blank direction hack unnecessary.
-
-    def after_move(self, mov: dict[str, any]) -> list[str]:
-        """Returns a new board order repesenting the state after the move is taken"""
-        # deepcopy is used to let us look ahead at future boards without changing the current one
-        p, kind = mov["peon"], mov["kind"]
-        n_bord = deepcopy(self.order)
-        emp = self.peon_find(p.dest(kind))
-        n_bord[emp.place] = p.id
-        n_bord[p.place] = emp.id
-        return n_bord
 
 
 def score(order: list[str]) -> int:
@@ -298,12 +298,16 @@ But we don't necessarily need to add them to the AI
 """
 
 # todo:
-#  make generic choice function, that accept score functions, and random.
-#   obviously doesn't include interactive choice
+#  generic choice functions (glue code)
 
 # Done:
 #  Either incorporate content into board or make it just be a plain list.
 #  The interactive function is conditioned wrong. Rethink.
 
+# don't:
+# make generic choice function, that accept score functions, and random.
+# obviously doesn't include interactive choice.
+
 # N/A
 # make empty peon less object and regular more?
+
