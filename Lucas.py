@@ -22,7 +22,7 @@ class Peon:
         """Returns direction as positive or negative unit (int)"""
         return {'g': 1, ' ': 0, 'b': -1}[color]
 
-@property
+    @property
     def place(self) -> int:
         return self._bord.place(self.id)
 
@@ -306,4 +306,3 @@ But we don't necessarily need to add them to the AI.
 
 # N/A
 # make empty peon less object and regular more?
-
