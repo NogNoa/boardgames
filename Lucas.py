@@ -1,15 +1,15 @@
 from copy import deepcopy
 import random as rnd
 
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Callable
 
 
 class Peon:
-    def __init__(self, color: str, ordinal: int):
+    def __init__(self, color: str, ordinal: int, bord):
         self.color = color
         self.id = color + str(ordinal)
         self.dir = self.dir(color)
-        self._bord = None
+        self._bord = bord
 
     def __str__(self):
         return self.id
@@ -17,21 +17,12 @@ class Peon:
     def __repr__(self):
         return self.id
 
-    @property
-    def bord(self):
-        return self._bord
-
-    @bord.setter
-    def bord(self, bord):
-        self._bord = bord if not self._bord else self._bord
-        # safety by first board wins
-
     @staticmethod
     def dir(color):
         """Returns direction as positive or negative unit (int)"""
         return {'g': 1, ' ': 0, 'b': -1}[color]
 
-    @property
+@property
     def place(self) -> int:
         return self._bord.place(self.id)
 
@@ -51,8 +42,8 @@ class Peon:
 
 
 class EmptySpace(Peon):
-    def __init__(self, ordinal: int):
-        super().__init__(' ', ordinal)
+    def __init__(self, ordinal: int, bord):
+        super().__init__(' ', ordinal, bord)
 
     @staticmethod
     def is_move(*_) -> bool:
@@ -60,11 +51,12 @@ class EmptySpace(Peon):
 
 
 class Board:
-    def __init__(self, peoni: list[Peon]):
+    def __init__(self, nmr_side, nmr_emp):
+        peoni = [Peon('g', i, self) for i in range(nmr_side)]
+        peoni.extend([(EmptySpace(i + nmr_side, self)) for i in range(nmr_emp)])
+        peoni.extend([Peon('b', i + nmr_side + nmr_emp, self) for i in range(nmr_side)])
         self.order = [p.id for p in peoni]
         self.cntnt = {p.id: p for p in peoni}
-        for p in peoni:
-            p.bord = self
 
     def __getitem__(self, i: int) -> str:
         return self.order[i]
@@ -86,9 +78,9 @@ class Board:
         except KeyError:
             return None
 
-    def move(self, mov: Dict[str, any]) -> list[str]:
-        """Returns a new order repesenting the state after the move is taken."""
-        # deepcopy is used to let us look ahead at future boards without changing the current one.
+    def after_move(self, mov: Dict[str:Peon, str:str]) -> list[str]:
+        """returns a new board order repesenting the state after the move is taken"""
+        # deepcopy is used to let us look ahead at future boards without changing the current one
         p, kind = mov["peon"], mov["kind"]
         n_order = deepcopy(self.order)
         emp = self.peon_find(p.dest(kind))
@@ -96,9 +88,9 @@ class Board:
         n_order[p.place] = emp.id
         return n_order
 
-    def list_moves(self) -> list[Dict[str, any]]:
-        """Returns list of possible moves. Each move formated as
-        a pair of a peon object, and a string for the kind of move."""
+    def list_moves(self) -> list[Dict[str:Peon, str:str]]:
+        """Returns list of possible moves. each move formated as
+        a pair of a peon objects, and a string for the kind of move."""
         movi = []
         for p in self:
             p = self.peon_find(p)
@@ -108,6 +100,9 @@ class Board:
                 if p.is_move(k):
                     movi.append({'peon': p, 'kind': k})
         return movi
+
+    # skipping blank peon move listing fixes IndexError in this function in the endgame.
+    # it might make prior blank direction hack unnecessary.
 
 
 def score(order: list[str]) -> int:
@@ -122,15 +117,11 @@ def score(order: list[str]) -> int:
     return back
 
 
-# Skipping blank peon move listing fixes IndexError in this function in the endgame.
-# It might make prior blank direction hack unnecessary.
-
-
-def movi_score(movi: list[Dict[str, any]], bord: Board, scrfunc) -> list[int]:
-    """Take a list of moves without a score and adds a score."""
+def movi_score(movi: list[dict[str:]], bord: Board, scrfunc: Callable) -> list[int]:
+    """Take a list of moves without a score and adds a score"""
     scori = []
     for mov in movi:
-        consequnce = bord.move(mov)
+        consequnce = bord.after_move(mov)
         scr = scrfunc(consequnce)
         scori.append(scr)
     return scori
@@ -153,21 +144,17 @@ class NoMoveError(Exception):
     pass
 
 
-def game(choice_fun="interactive", nmr_side=4, nmr_emp=2, dbg=False):
-    openning = [Peon('g', i) for i in range(nmr_side)]
-    openning.extend([(EmptySpace(i + nmr_side)) for i in range(nmr_emp)])
-    openning.extend([Peon('b', i + nmr_side + nmr_emp) for i in range(nmr_side)])
-    bord = Board(openning)
+def game(choice_fun="interactive", nmr_side=4, nmr_emp=2):
+    bord = Board(nmr_side, nmr_emp)
     print(bord)
     choice_fun = eval(f"{choice_fun}_choice")
     while True:
         movi = bord.list_moves()
         try:
             ch = choice_fun(movi, bord)
-            bord.order = bord.move(ch)
+            bord.order = bord.after_move(ch)
             print(bord)
-            if dbg:
-                print(score(bord.order))
+            if debug: print(score(bord.order))
         except (IndexError, NoMoveError):
             if score(bord.order) == winscore(len(bord), nmr_side):
                 print("You've done did it Chemp!")
@@ -269,6 +256,7 @@ def interactive_choice(movi: list[Dict[str, any]], bord: Board) -> Dict[str, any
 if __name__ == "__main__":
     def main():
         import argparse
+        global debug
 
         choices = {"max_center", "random", "first_max", "rand_max", "emp_center", "center_max", "interactive"}
         parser = argparse.ArgumentParser(
@@ -279,13 +267,15 @@ if __name__ == "__main__":
         parser.add_argument("-e", help="Number of empty spaces in the middle", default=2)
         parser.add_argument("-d", help="Turn on debug mode", action="store_true", )
         args = parser.parse_args()
+        debug = args.d
 
         if args.choice not in choices:
             print("Please enter a valid decision algorithm:\n\t", str(choices)[1:-1])
             exit(0)
-        game(args.choice, args.p, args.e, args.d)
+        game(args.choice, 4, 2)
 
 
+    debug = None
     main()
 
 """
@@ -304,9 +294,16 @@ But we don't necessarily need to add them to the AI.
 """
 
 # todo:
-#  make empty peon less object and regular more?
 #  generic choice functions (glue code)
+
+# Done:
+#  Either incorporate content into board or make it just be a plain list.
+#  The interactive function is conditioned wrong. Rethink.
 
 # don't:
 # make generic choice function, that accept score functions, and random.
 # obviously doesn't include interactive choice.
+
+# N/A
+# make empty peon less object and regular more?
+
