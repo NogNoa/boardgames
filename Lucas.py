@@ -144,10 +144,10 @@ class NoMoveError(Exception):
     pass
 
 
-def game(choice_fun="interactive", nmr_side=4, nmr_emp=2):
+def game(choice_args=("interactive",), nmr_side=4, nmr_emp=2):
     bord = Board(nmr_side, nmr_emp)
     print(bord)
-    choice_fun = eval(f"{choice_fun}_choice")
+    choice_fun = choice_find(choice_args)
     while True:
         movi = bord.list_moves()
         try:
@@ -169,9 +169,11 @@ def choice_find(*choice_argi: Tuple[str]):
             return random_choice
         else:
             scr_fun = eval(f"{choice_argi[0]}_scr")
-            return single_pref_choice
+            return single_pref_choice(scr_fun)
     else:
-        return two_pref_choice
+        scr_fun1 = eval(f"{choice_argi[0]}_scr")
+        scr_fun2 = eval(f"{choice_argi[1]}_scr")
+        return two_pref_choice(scr_fun1, scr_fun2)
 
 
 def random_choice(movi: list[Dict[str, any]]) -> Dict[str, any]:
@@ -199,20 +201,24 @@ def first_max_choice(movi: list[Dict[str, any]], bord: Board, scr_fun=score) -> 
 
 
 @choice
-def single_pref_choice(movi: list[Dict[str, any]], bord: Board, scr_fun) -> list[int]:
-    scori = movi_score(movi, bord, scr_fun)
-    best = max(scori)
-    return [pl for pl, scr in enumerate(scori) if scr == best]
+def single_pref_choice(scr_fun):
+    def general_1pref_choice(movi: list[Dict[str, any]], bord: Board) -> list[int]:
+        scori = movi_score(movi, bord, scr_fun)
+        best = max(scori)
+        return [pl for pl, scr in enumerate(scori) if scr == best]
+    return general_1pref_choice
 
 
 @choice
-def two_pref_choice(movi: list[Dict[str, any]], bord: Board, scr_fun_1, scr_fun_2) -> list[int]:
-    scori_1 = movi_score(movi, bord, scr_fun_1)
-    scori_2 = movi_score(movi, bord, scr_fun_2)
-    max_1 = max(scori_1)
-    besti = [scr if scori_1[pl] == max_1 else 0 for pl, scr in enumerate(scori_2)]
-    best_of_both = max(besti)
-    return [pl for pl, scr in enumerate(besti) if scr == best_of_both]
+def two_pref_choice(scr_fun_1, scr_fun_2):
+    def general_2pref_choice(movi: list[Dict[str, any]], bord: Board, ) -> list[int]:
+        scori_1 = movi_score(movi, bord, scr_fun_1)
+        scori_2 = movi_score(movi, bord, scr_fun_2)
+        max_1 = max(scori_1)
+        besti = [scr if scori_1[pl] == max_1 else 0 for pl, scr in enumerate(scori_2)]
+        best_of_both = max(besti)
+        return [pl for pl, scr in enumerate(besti) if scr == best_of_both]
+    return general_2pref_choice
 
 
 """def keep_options_choice(movi: list[Dict], bord: Board, pf: Content) -> Dict:
