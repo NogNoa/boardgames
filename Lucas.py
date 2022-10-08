@@ -127,7 +127,7 @@ def movi_score(movi: list[Dict[str, any]], bord: Board, scrfunc: Callable) -> li
     return scori
 
 
-def emp_center_scr(consq: list[str]) -> int:
+def empty_center_scr(consq: list[str]) -> int:
     scr = 0
     cntr = len(consq) / 2
     for i, p in enumerate(consq):
@@ -161,7 +161,7 @@ def game(choice_args=("interactive",), nmr_side=4, nmr_emp=2):
             break
 
 
-def choice_find(*choice_argi: Tuple[str]):
+def choice_find(choice_argi: Tuple[str]):
     if len(choice_argi) == 1:
         if choice_argi[0] == "interactive":
             return interactive_choice
@@ -265,20 +265,20 @@ if __name__ == "__main__":
         import argparse
         global debug
 
-        choices = {"max_center", "random", "first_max", "rand_max", "emp_center", "center_max", "interactive"}
+        choices = {"center", "random", "first", "empty", "interactive"}
         parser = argparse.ArgumentParser(
             description=f"A game of lucas. you can choose an algorithm or play interactively: {choices}")
-        parser.add_argument('choice', metavar="C", nargs="?", default="interactive",
-                            help="Algorithm to decide the moves")
+        parser.add_argument('choice', metavar="C", nargs="*", help="Algorithm to decide the moves")
         parser.add_argument("-p", help="Number of peons on each side", default=4)
         parser.add_argument("-e", help="Number of empty spaces in the middle", default=2)
         parser.add_argument("-d", help="Turn on debug mode", action="store_true", )
         args = parser.parse_args()
         debug = args.d
 
-        if args.choice not in choices:
+        if not set(args.choice).issubset(choices):
             print("Please enter a valid decision algorithm:\n\t", str(choices)[1:-1])
             exit(0)
+        args.choice = tuple(args.choice) if args.choice else ("interactive",)
         game(args.choice, 4, 2)
 
 
