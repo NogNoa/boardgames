@@ -253,6 +253,7 @@ def interactive_choice(movi: list[Dict[str, any]], bord: Board) -> Dict[str, any
 
 # priority in function names from right to left
 
+debug = False
 if __name__ == "__main__":
     def main():
         import argparse
@@ -275,7 +276,6 @@ if __name__ == "__main__":
         game(args.choice, 4, 2)
 
 
-    debug = None
     main()
 
 """
@@ -295,6 +295,7 @@ But we don't necessarily need to add them to the AI.
 
 # todo:
 #  generic choice functions (glue code)
+#  rebust AI
 
 # Done:
 #  Either incorporate content into board or make it just be a plain list.
