@@ -105,7 +105,7 @@ class Board:
     # it might make prior blank direction hack unnecessary.
 
 
-def score(order: list[str]) -> int:
+def adv_scr(order: list[str]) -> int:
     back = 0
     for i, p in enumerate(order):
         point = i
@@ -136,6 +136,14 @@ def empty_center_scr(consq: list[str]) -> int:
     return scr
 
 
+"""def first_scr(consq: list[str], first: bool) -> int:
+    return 16 * first"""
+
+
+def random_scr(consq: list[str]) -> int:
+    return int(rnd.random() * len(consq))
+
+
 def winscore(lng, nmr_side):
     return (lng * 2 - nmr_side - 1) * nmr_side
 
@@ -154,9 +162,9 @@ def game(choice_args=("interactive",), nmr_side=4, nmr_emp=2):
             ch = choice_fun(movi, bord)
             bord.order = bord.after_move(ch)
             print(bord)
-            if debug: print(score(bord.order))
+            if debug: print(adv_scr(bord.order))
         except (IndexError, NoMoveError):
-            if score(bord.order) == winscore(len(bord), nmr_side):
+            if adv_scr(bord.order) == winscore(len(bord), nmr_side):
                 print("You've done did it Chemp!")
             break
 
@@ -191,7 +199,7 @@ def choice(ch_fun):
     return general_choice
 
 
-def first_max_choice(movi: list[Dict[str, any]], bord: Board, scr_fun=score) -> Dict[str, any]:
+def first_max_choice(movi: list[Dict[str, any]], bord: Board, scr_fun=adv_scr) -> Dict[str, any]:
     if not movi:
         raise NoMoveError
     scori = movi_score(movi, bord, scr_fun)
@@ -206,6 +214,7 @@ def single_pref_choice(scr_fun):
         scori = movi_score(movi, bord, scr_fun)
         best = max(scori)
         return [pl for pl, scr in enumerate(scori) if scr == best]
+
     return general_1pref_choice
 
 
@@ -218,6 +227,7 @@ def two_pref_choice(scr_fun_1, scr_fun_2):
         besti = [scr if scori_1[pl] == max_1 else 0 for pl, scr in enumerate(scori_2)]
         best_of_both = max(besti)
         return [pl for pl, scr in enumerate(besti) if scr == best_of_both]
+
     return general_2pref_choice
 
 
@@ -265,7 +275,7 @@ if __name__ == "__main__":
         import argparse
         global debug
 
-        choices = {"center", "random", "first", "empty", "interactive"}
+        choices = {"random", "first", "emp_center", "interactive", "adv"}
         parser = argparse.ArgumentParser(
             description=f"A game of lucas. you can choose an algorithm or play interactively: {choices}")
         parser.add_argument('choice', metavar="C", nargs="*", help="Algorithm to decide the moves")
