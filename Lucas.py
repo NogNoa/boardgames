@@ -136,8 +136,8 @@ def empty_center_scr(consq: list[str]) -> int:
     return scr
 
 
-"""def first_scr(consq: list[str], first: bool) -> int:
-    return 16 * first"""
+def first_scr(_) -> int:
+    return 1
 
 
 def random_scr(consq: list[str]) -> int:
@@ -208,8 +208,8 @@ def first_max_choice(movi: list[Dict[str, any]], bord: Board, scr_fun=adv_scr) -
     return back
 
 
-@choice
 def single_pref_choice(scr_fun):
+    @choice
     def general_1pref_choice(movi: list[Dict[str, any]], bord: Board) -> list[int]:
         scori = movi_score(movi, bord, scr_fun)
         best = max(scori)
@@ -218,8 +218,8 @@ def single_pref_choice(scr_fun):
     return general_1pref_choice
 
 
-@choice
 def two_pref_choice(scr_fun_1, scr_fun_2):
+    @choice
     def general_2pref_choice(movi: list[Dict[str, any]], bord: Board, ) -> list[int]:
         scori_1 = movi_score(movi, bord, scr_fun_1)
         scori_2 = movi_score(movi, bord, scr_fun_2)
@@ -310,12 +310,12 @@ But we don't necessarily need to add them to the AI.
 """
 
 # todo:
-#  generic choice functions (glue code)
 #  rebust AI
 
 # Done:
 #  Either incorporate content into board or make it just be a plain list.
 #  The interactive function is conditioned wrong. Rethink.
+#  generic choice functions (glue code)
 
 # don't:
 # make generic choice function, that accept score functions, and random.
