@@ -275,7 +275,7 @@ if __name__ == "__main__":
         import argparse
         global debug
 
-        choices = {"random", "first", "emp_center", "interactive", "adv"}
+        choices = {"random", "first", "empty_center", "interactive", "adv"}
         parser = argparse.ArgumentParser(
             description=f"A game of lucas. you can choose an algorithm or play interactively: {choices}")
         parser.add_argument('choice', metavar="C", nargs="*", help="Algorithm to decide the moves")
