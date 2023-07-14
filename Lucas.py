@@ -143,6 +143,10 @@ def first_choice(movi: list[mov_t]) -> mov_t:
     return movi[0]
 
 
+def first_scr(_) -> int:
+    return 1
+
+
 def random_scr(consq: list[str]) -> int:
     return int(rnd.random() * len(consq))
 
@@ -155,6 +159,10 @@ class NoMoveError(Exception):
     pass
 
 
+class OneMove(Exception):
+    pass
+
+
 def game(choice_args=("interactive",), nmr_side=4, nmr_emp=2):
     bord = Board(nmr_side, nmr_emp)
     print(bord)
@@ -162,8 +170,11 @@ def game(choice_args=("interactive",), nmr_side=4, nmr_emp=2):
     while True:
         movi = bord.list_moves()
         try:
-            for fun in choice_funi:
-                movi = fun(movi, bord)
+            try:
+                for fun in choice_funi:
+                    movi = fun(movi, bord)
+            except OneMove:
+                pass
             mov = terminal(movi)
             bord.order = bord.after_move(mov)
             print(bord)
@@ -197,21 +208,14 @@ def choice(scr_fun):
     def general_choice(movi: list[mov_t], bord: Board) -> list[mov_t]:
         if not movi:
             raise NoMoveError
+        if len(movi) == 1:
+            raise OneMove
         scori = movi_score(movi, bord, scr_fun)
         best = max(scori)
         besti = [movi[pl] for pl, scr in enumerate(scori) if scr == best]
         return besti
 
     return general_choice
-
-
-def first_max_choice(movi: list[mov_t], bord: Board, scr_fun=adv_scr) -> mov_t:
-    if not movi:
-        raise NoMoveError
-    scori = movi_score(movi, bord, scr_fun)
-    best = max(scori)
-    back = movi[scori.index(best)]
-    return back
 
 
 """def keep_options_choice(movi: list[Dict], bord: Board, pf: Content) -> Dict:
