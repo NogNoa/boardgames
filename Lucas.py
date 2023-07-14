@@ -158,7 +158,7 @@ class NoMoveError(Exception):
 def game(choice_args=("interactive",), nmr_side=4, nmr_emp=2):
     bord = Board(nmr_side, nmr_emp)
     print(bord)
-    choice_fun = choice_find(choice_args)
+    choice_fun = choice_parse(choice_args)
     while True:
         movi = bord.list_moves()
         try:
@@ -176,23 +176,28 @@ def random_choice(movi: list[mov_t]) -> mov_t:
     return rnd.choice(movi)
 
 
-def choice_find(choice_argi: Tuple[str]):
-    if len(choice_argi) == 1 and (ch := choice_argi[0]) in {"interactive", "random"}:
-        return (), eval(f"{ch}_choice")
-    else:
-
-        scr_fun1 = eval(f"{choice_argi[0]}_scr")
-        scr_fun2 = eval(f"{choice_argi[1]}_scr")
-        return two_pref_choice(scr_fun1, scr_fun2)
+class WrongInput(Exception):
+    pass
 
 
-def general_choice(movi: list[mov_t], bord: Board, scr_fun) -> list[mov_t]:
-    if not movi:
-        raise NoMoveError
-    scori = movi_score(movi, bord, scr_fun)
-    best = max(scori)
-    besti = [movi[pl] for pl, scr in enumerate(scori) if scr == best]
-    return besti
+def choice_parse(choice_argi: Tuple[str]):
+    if choice_argi[-1] not in {"interactive", "random"}:
+        raise WrongInput
+    choice_funi = tuple(choice(eval(f"{arg}_scr")) for arg in choice_argi[:-1])
+    terminal = eval(f"{choice_argi[-1]}_choice")
+    return choice_funi, terminal
+
+
+def choice(scr_fun):
+    def general_choice(movi: list[mov_t], bord: Board) -> list[mov_t]:
+        if not movi:
+            raise NoMoveError
+        scori = movi_score(movi, bord, scr_fun)
+        best = max(scori)
+        besti = [movi[pl] for pl, scr in enumerate(scori) if scr == best]
+        return besti
+
+    return general_choice
 
 
 def first_max_choice(movi: list[mov_t], bord: Board, scr_fun=adv_scr) -> mov_t:
