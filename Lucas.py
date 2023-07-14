@@ -1,7 +1,7 @@
 from copy import deepcopy
 import random as rnd
 
-from typing import Tuple, Dict, List, Callable
+from typing import Dict, List, Callable
 
 
 class Peon:
@@ -139,8 +139,8 @@ def empty_center_scr(consq: list[str]) -> int:
     return scr
 
 
-def first_scr(_) -> int:
-    return 1
+def first_choice(movi: list[mov_t]) -> mov_t:
+    return movi[0]
 
 
 def random_scr(consq: list[str]) -> int:
@@ -158,12 +158,14 @@ class NoMoveError(Exception):
 def game(choice_args=("interactive",), nmr_side=4, nmr_emp=2):
     bord = Board(nmr_side, nmr_emp)
     print(bord)
-    choice_fun = choice_parse(choice_args)
+    choice_funi, terminal = choice_parse(choice_args)
     while True:
         movi = bord.list_moves()
         try:
-            ch = choice_fun(movi, bord)
-            bord.order = bord.after_move(ch)
+            for fun in choice_funi:
+                movi = fun(movi, bord)
+            mov = terminal(movi)
+            bord.order = bord.after_move(mov)
             print(bord)
             if debug: print(adv_scr(bord.order))
         except (IndexError, NoMoveError):
@@ -180,11 +182,14 @@ class WrongInput(Exception):
     pass
 
 
-def choice_parse(choice_argi: Tuple[str]):
-    if choice_argi[-1] not in {"interactive", "random"}:
-        raise WrongInput
-    choice_funi = tuple(choice(eval(f"{arg}_scr")) for arg in choice_argi[:-1])
-    terminal = eval(f"{choice_argi[-1]}_choice")
+def choice_parse(choice_argi: List[str]):
+    if choice_argi[-1] in {"first", "random"}:
+        terminal = eval(f"{choice_argi.pop()}_choice")
+    elif choice_argi[-1] == "interactive":
+        return (), eval(f"{choice_argi.pop()}_choice")
+    else:
+        terminal = first_choice
+    choice_funi = tuple(choice(eval(f"{arg}_scr")) for arg in choice_argi)
     return choice_funi, terminal
 
 
