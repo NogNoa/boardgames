@@ -139,10 +139,6 @@ def empty_center_scr(consq: list[str]) -> int:
     return scr
 
 
-def first_choice(movi: list[mov_t], *args) -> mov_t:
-    return movi[0]
-
-
 def first_scr(_) -> int:
     return 1
 
@@ -185,20 +181,16 @@ def game(choice_args=("interactive",), nmr_side=4, nmr_emp=2):
             break
 
 
-def random_choice(movi: list[mov_t], *args) -> mov_t:
-    return rnd.choice(movi)
-
-
 class WrongInput(Exception):
     pass
 
 
 def choice_parse(choice_argi: List[str]):
-    choice_argi = list(choice_argi)
     if choice_argi[-1] in {"first", "random"}:
+        choice_argi = list(choice_argi)
         terminal = eval(f"{choice_argi.pop()}_choice")
-    elif choice_argi[-1] == "interactive":
-        return (), eval(f"{choice_argi.pop()}_choice")
+    elif "interactive" in choice_argi:
+        return (), interactive_choice
     else:
         terminal = first_choice
     choice_funi = tuple(choice(eval(f"{arg}_scr")) for arg in choice_argi)
@@ -219,9 +211,14 @@ def choice(scr_fun):
     return general_choice
 
 
-"""def keep_options_choice(movi: list[Dict], bord: Board, pf: Content) -> Dict:
-    scori = movi_score(movi, bord, movi_count)
-"""
+# termianl choices
+
+def first_choice(movi: list[mov_t], *args) -> mov_t:
+    return movi[0]
+
+
+def random_choice(movi: list[mov_t], *args) -> mov_t:
+    return rnd.choice(movi)
 
 
 def interactive_choice(movi: list[mov_t], bord: Board) -> mov_t:
