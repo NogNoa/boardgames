@@ -139,7 +139,7 @@ def empty_center_scr(consq: list[str]) -> int:
     return scr
 
 
-def first_choice(movi: list[mov_t]) -> mov_t:
+def first_choice(movi: list[mov_t], *args) -> mov_t:
     return movi[0]
 
 
@@ -175,7 +175,7 @@ def game(choice_args=("interactive",), nmr_side=4, nmr_emp=2):
                     movi = fun(movi, bord)
             except OneMove:
                 pass
-            mov = terminal(movi)
+            mov = terminal(movi, bord)
             bord.order = bord.after_move(mov)
             print(bord)
             if debug: print(adv_scr(bord.order))
@@ -185,7 +185,7 @@ def game(choice_args=("interactive",), nmr_side=4, nmr_emp=2):
             break
 
 
-def random_choice(movi: list[mov_t]) -> mov_t:
+def random_choice(movi: list[mov_t], *args) -> mov_t:
     return rnd.choice(movi)
 
 
@@ -194,6 +194,7 @@ class WrongInput(Exception):
 
 
 def choice_parse(choice_argi: List[str]):
+    choice_argi = list(choice_argi)
     if choice_argi[-1] in {"first", "random"}:
         terminal = eval(f"{choice_argi.pop()}_choice")
     elif choice_argi[-1] == "interactive":
