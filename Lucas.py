@@ -152,12 +152,18 @@ def winscore(lng, nmr_side):
 
 
 def structural_scr(consq: list[str]) -> int:
+    consq = [p[0] for p in consq]
     back = 0
-    while consq[-1][0] == 'b':
+    while consq[-1] == 'b':
         consq.pop()
-    for p in consq:
-        if p[0] == 'g':
-            cont
+        back += 1
+    consq_iter = iter(consq)
+    while next(consq_iter) == "g":
+        back += 1
+    # stop iteration means not only that there are no spaces
+    # but that the game is in it's end-state. Something is already wrong.
+    for p in consq_iter:
+
 
 
 class NoMoveError(Exception):
