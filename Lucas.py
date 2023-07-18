@@ -157,13 +157,12 @@ def structural_scr(consq: list[str]) -> int:
     while consq[-1] == 'b':
         consq.pop()
         back += 1
-    consq_iter = iter(consq)
-    while next(consq_iter) == "g":
-        back += 1
-    # stop iteration means not only that there are no spaces
-    # but that the game is in it's end-state. Something is already wrong.
-    for p in consq_iter:
-
+    for i, p in enumerate(consq):
+        if p != "g":
+            break
+    # noinspection PyUnboundLocalVariable
+    back += i
+    for p in consq[i:]:
 
 
 class NoMoveError(Exception):
