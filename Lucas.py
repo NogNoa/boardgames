@@ -151,6 +151,15 @@ def winscore(lng, nmr_side):
     return (lng * 2 - nmr_side - 1) * nmr_side
 
 
+def structural_scr(consq: list[str]) -> int:
+    back = 0
+    while consq[-1][0] == 'b':
+        consq.pop()
+    for p in consq:
+        if p[0] == 'g':
+            cont
+
+
 class NoMoveError(Exception):
     pass
 
@@ -284,7 +293,7 @@ The winning strategy is basicaly to identify dead blocks and avoid making them.
 a dead block is a block of peons, none of which could move, no matter of free spaces
 there is around the block.
 
-we don't need to take the ends of the board into account, in fact we have to desregard them.
+We can ignore the end for the sake of steps but not of jumps.
 a block in the opposite end is fine this is the desired endstate of those peons, 
 and if the board didn't end those peons could have moved.
 
